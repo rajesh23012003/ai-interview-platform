@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   Sparkles, 
   Briefcase, 
@@ -10,7 +10,9 @@ import {
   UploadCloud,
   FileCheck,
   AlertCircle,
-  Code2
+  Code2,
+  Trash2,
+  FileUp
 } from 'lucide-react';
 
 const SAMPLE_RESUMES = {
@@ -81,18 +83,93 @@ export default function SetupScreen({ onStartInterview }) {
   const [companyType, setCompanyType] = useState('Product Startup (High Velocity)');
   const [resumeText, setResumeText] = useState(SAMPLE_RESUMES.fullstack);
   const [analyzing, setAnalyzing] = useState(false);
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const [uploadedFileName, setUploadedFileName] = useState('');
   const [resumeAnalysis, setResumeAnalysis] = useState(null);
+  const fileInputRef = useRef(null);
 
   const handleRoleChange = (e) => {
     const selectedRole = e.target.value;
     setRole(selectedRole);
-    if (selectedRole.includes('Front')) {
-      setResumeText(SAMPLE_RESUMES.frontend);
-    } else if (selectedRole.includes('Back')) {
-      setResumeText(SAMPLE_RESUMES.backend);
-    } else {
-      setResumeText(SAMPLE_RESUMES.fullstack);
+    if (!uploadedFileName) {
+      if (selectedRole.includes('Front')) {
+        setResumeText(SAMPLE_RESUMES.frontend);
+      } else if (selectedRole.includes('Back')) {
+        setResumeText(SAMPLE_RESUMES.backend);
+      } else {
+        setResumeText(SAMPLE_RESUMES.fullstack);
+      }
     }
+  };
+
+  const handleFileSelect = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingFile(true);
+    setUploadedFileName(file.name);
+
+    try {
+      if (file.name.toLowerCase().endsWith('.pdf')) {
+        const formData = new FormData();
+        formData.append('resume_file', file);
+
+        const res = await fetch('/api/resume/upload', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+          setResumeText(data.extractedText);
+          setResumeAnalysis(data.analysis);
+        } else {
+          alert(data.message || 'Error parsing PDF document');
+        }
+      } else {
+        // Text or Markdown
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const text = event.target.result;
+          setResumeText(text);
+          triggerAutoScan(text);
+        };
+        reader.readAsText(file);
+      }
+    } catch (err) {
+      console.error('File upload error:', err);
+      alert('Unable to read resume file. You can also paste text directly.');
+    } finally {
+      setUploadingFile(false);
+    }
+  };
+
+  const triggerAutoScan = async (text) => {
+    setAnalyzing(true);
+    try {
+      const res = await fetch('/api/resume/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          candidate_name: candidateName,
+          target_role: role,
+          resume_text: text
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setResumeAnalysis(data.analysis);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
+  const handleClearResume = () => {
+    setResumeText('');
+    setUploadedFileName('');
+    setResumeAnalysis(null);
   };
 
   const handleAnalyzeResume = async () => {
@@ -234,38 +311,109 @@ export default function SetupScreen({ onStartInterview }) {
 
         {/* Right Column: Resume Input & ATS Analysis */}
         <div className="glass-card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            onChange={handleFileSelect} 
+            accept=".pdf,.txt,.md" 
+            style={{ display: 'none' }} 
+          />
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
             <h2 style={{ fontSize: '1.15rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '10px' }}>
               <FileText size={20} color="var(--accent-cyan)" />
               Candidate Resume
             </h2>
 
-            <button
-              type="button"
-              onClick={handleAnalyzeResume}
-              disabled={analyzing}
-              className="btn-ai btn-ai-secondary"
-              style={{ padding: '6px 14px', fontSize: '0.8rem' }}
-            >
-              <Sparkles size={14} color="var(--accent-cyan)" />
-              <span>{analyzing ? 'Analyzing...' : 'Scan ATS Keywords'}</span>
-            </button>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingFile}
+                className="btn-ai btn-ai-primary"
+                style={{ padding: '6px 14px', fontSize: '0.8rem', background: 'linear-gradient(135deg, #06b6d4, #0891b2)' }}
+              >
+                <FileUp size={14} />
+                <span>{uploadingFile ? 'Extracting PDF...' : 'Upload PDF / Text'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleAnalyzeResume}
+                disabled={analyzing}
+                className="btn-ai btn-ai-secondary"
+                style={{ padding: '6px 14px', fontSize: '0.8rem' }}
+              >
+                <Sparkles size={14} color="var(--accent-cyan)" />
+                <span>{analyzing ? 'Scanning...' : 'Scan ATS'}</span>
+              </button>
+            </div>
           </div>
 
+          {uploadedFileName && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              background: 'rgba(6, 182, 212, 0.1)',
+              border: '1px solid rgba(6, 182, 212, 0.3)',
+              borderRadius: 'var(--radius-sm)',
+              padding: '6px 12px',
+              fontSize: '0.78rem',
+              color: '#67e8f9',
+              marginBottom: '10px'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <CheckCircle2 size={14} color="#06b6d4" />
+                <span>Uploaded: <strong>{uploadedFileName}</strong> (Text Extracted)</span>
+              </div>
+              <button
+                type="button"
+                onClick={handleClearResume}
+                style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '0.72rem' }}
+              >
+                Remove
+              </button>
+            </div>
+          )}
+
           <div className="input-group" style={{ marginBottom: '14px' }}>
-            <label className="input-label">Paste Resume Content</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+              <label className="input-label" style={{ margin: 0 }}>
+                {uploadedFileName ? 'Extracted Resume Content' : 'Paste Your Resume or Edit Below'}
+              </label>
+              {resumeText && (
+                <button
+                  type="button"
+                  onClick={handleClearResume}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#94a3b8',
+                    cursor: 'pointer',
+                    fontSize: '0.72rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <Trash2 size={12} />
+                  <span>Clear</span>
+                </button>
+              )}
+            </div>
             <textarea
               className="text-input"
-              style={{ height: '240px', fontFamily: "'JetBrains Mono', monospace", fontSize: '0.8rem' }}
+              style={{ height: '220px', fontFamily: "'JetBrains Mono', monospace", fontSize: '0.8rem' }}
               value={resumeText}
               onChange={(e) => setResumeText(e.target.value)}
-              placeholder="Paste your resume text here (Education, Skills, Experience, Projects)..."
+              placeholder="Paste your own resume content here (Skills, Experience, Education, Projects)..."
             />
           </div>
 
           {/* Quick preset buttons */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '18px' }}>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Load Template:</span>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Or use template:</span>
             <button
               type="button"
               onClick={() => setResumeText(SAMPLE_RESUMES.fullstack)}

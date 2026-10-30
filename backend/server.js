@@ -1,11 +1,15 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const multer = require('multer');
+const pdfParse = require('pdf-parse');
 const db = require('./database');
 const aiEngine = require('./aiEngine');
 
 const app = express();
 const PORT = process.env.PORT || 5050;
+
+const upload = multer({ limits: { fileSize: 10 * 1024 * 1024 } });
 
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
@@ -15,8 +19,39 @@ const frontendDist = path.join(__dirname, '../frontend/dist');
 app.use(express.static(frontendDist));
 
 // -------------------------------------------------------------
-// 1. RESUME ANALYZER API
+// 1. RESUME ANALYZER & FILE UPLOAD API
 // -------------------------------------------------------------
+app.post('/api/resume/upload', upload.single('resume_file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'No resume file uploaded' });
+    }
+
+    let extractedText = '';
+    const isPdf = req.file.mimetype === 'application/pdf' || req.file.originalname.toLowerCase().endsWith('.pdf');
+
+    if (isPdf) {
+      const pdfData = await pdfParse(req.file.buffer);
+      extractedText = pdfData.text || '';
+    } else {
+      extractedText = req.file.buffer.toString('utf-8');
+    }
+
+    const cleanText = extractedText.replace(/\r\n/g, '\n').trim();
+    const analysis = aiEngine.parseResume(cleanText);
+
+    res.json({
+      success: true,
+      filename: req.file.originalname,
+      extractedText: cleanText,
+      analysis
+    });
+  } catch (err) {
+    console.error('File parsing error:', err);
+    res.status(500).json({ success: false, message: 'Failed to extract text from file: ' + err.message });
+  }
+});
+
 app.post('/api/resume/analyze', (req, res) => {
   try {
     const { resume_text, target_role, candidate_name } = req.body;
