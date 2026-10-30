@@ -1,0 +1,22 @@
+{
+  "name": "ai-interview-platform",
+  "version": "1.0.0",
+  "description": "AI-Powered Mock Interviewer & Resume Analyzer with Voice, Webcam and Real-time Feedback",
+  "scripts": {
+    "start": "node backend/server.js",
+    "backend": "node backend/server.js",
+    "frontend": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build"
+  },
+  "keywords": [
+    "ai",
+    "interview",
+    "mock-interview",
+    "speech-recognition",
+    "gemini",
+    "react",
+    "express"
+  ],
+  "author": "",
+  "license": "ISC"
+}
