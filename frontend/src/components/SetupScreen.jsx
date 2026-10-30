@@ -73,7 +73,99 @@ EXPERIENCE & PROJECTS
 1. Distributed Rate Limiter & API Gateway Service
 • Implemented a Token Bucket distributed rate limiting middleware using Redis and Lua scripts.
 • Decreased server crash rates to 0% during distributed DDoS stress testing.
-• Integrated Prometheus and Grafana for real-time latency monitoring.`
+• Integrated Prometheus and Grafana for real-time latency monitoring.`,
+
+  devops: `VIKAS MEHTA
+Email: vikas.devops@email.com | GitHub: github.com/vikas-ops | Certifications: CKA, AWS DevOps Pro
+
+SUMMARY
+DevOps Engineer with 3 years of hands-on experience in container orchestration (Kubernetes, Docker), Infrastructure as Code (Terraform), and robust CI/CD automation pipelines (GitHub Actions, Jenkins).
+
+TECHNICAL SKILLS
+• Orchestration: Kubernetes, Docker, Helm, Docker Compose
+• CI/CD: GitHub Actions, GitLab CI, Jenkins, ArgoCD
+• IaC & Automation: Terraform, Ansible, CloudFormation
+• Monitoring & Logging: Prometheus, Grafana, ELK Stack, Datadog
+• Cloud: AWS (EKS, EC2, S3, IAM, CloudWatch)
+
+EXPERIENCE & PROJECTS
+1. Production Kubernetes (EKS) Cluster Migration
+• Automated multi-tenant EKS cluster provisioning using Terraform and Helm charts.
+• Implemented ArgoCD GitOps workflow, reducing deployment failure rates by 35%.
+• Configured Prometheus alerts and Grafana dashboards for cluster-wide CPU and memory monitoring.`,
+
+  aws: `ANKIT SINGH
+Email: ankit.cloud@email.com | Certifications: AWS Certified Solutions Architect Associate (SAA-C03)
+
+SUMMARY
+AWS Cloud Engineer with 2+ years of experience designing secure, scalable, and highly available cloud infrastructure using Amazon Web Services.
+
+TECHNICAL SKILLS
+• Compute & Networking: AWS VPC, EC2, Auto Scaling Groups, ALB, Route53
+• Storage & Databases: Amazon S3, EBS, EFS, RDS (PostgreSQL/MySQL), DynamoDB
+• Security & Governance: IAM Roles & Policies, Security Groups, NACLs, KMS, AWS WAF
+• Monitoring & Serverless: CloudWatch, CloudTrail, AWS Lambda, SNS, SQS
+
+EXPERIENCE & PROJECTS
+1. Highly Available 3-Tier Web App on AWS
+• Designed a Multi-AZ VPC across 2 Availability Zones with isolated Public, Private App, and DB subnets.
+• Configured Application Load Balancer with Auto Scaling Groups, maintaining 99.99% uptime during traffic surges.
+• Automated daily snapshot backups and lifecycle policies for S3 buckets, saving 28% monthly cloud costs.`,
+
+  linux: `RAHUL KESHARI
+Email: rahul.linux@email.com | Certifications: Red Hat Certified System Administrator (RHCSA)
+
+SUMMARY
+Linux System Administrator with 3 years of experience managing enterprise RHEL, Rocky Linux, and Ubuntu servers. Proficient in Bash automation, systemd, user security, LVM, and network diagnostics.
+
+TECHNICAL SKILLS
+• OS: RHEL 8/9, CentOS, Ubuntu Server, Debian
+• Scripting & Automation: Bash, Shell Scripting, Cron, Ansible
+• Services: systemd, SSH, Nginx, Apache, Postfix, BIND DNS, NFS, Samba
+• Storage & Security: LVM, RAID, firewalld, iptables, SELinux, ACLs, SUID/SGID
+• Troubleshooting: top, htop, vmstat, iostat, tcpdump, netstat, strace
+
+EXPERIENCE & PROJECTS
+1. High-Availability Web & DNS Infrastructure
+• Managed fleet of 40+ Linux virtual machines on VMware ESXi and KVM.
+• Wrote automated Bash backup scripts with checksum verification and offsite rsync synchronization.
+• Configured LVM volume groups and expanded logical volumes on live production servers with zero downtime.`,
+
+  itsupport: `AMIT KUMAR
+Email: amit.support@email.com | Certifications: CompTIA Network+, ITIL v4 Foundation
+
+SUMMARY
+IT Support Specialist with 2+ years of experience in enterprise technical support, Active Directory administration, Windows Server, network diagnostics, and Office 365 administration.
+
+TECHNICAL SKILLS
+• Directory Services: Active Directory Users and Computers (ADUC), Group Policy (GPO), Azure AD (Entra ID)
+• Networking: TCP/IP, DNS, DHCP, VPN, Routers, Switches, Wi-Fi APs, Cabling (Cat6)
+• Systems & Software: Windows 10/11, Windows Server 2019/2022, Microsoft 365 Admin, Outlook, Teams
+• Ticketing & Remote Support: ServiceNow, Jira Service Desk, TeamViewer, AnyDesk, RDP
+
+EXPERIENCE & PROJECTS
+1. Tier-2 Enterprise IT Support Desk
+• Resolved 1,200+ tickets annually covering network outages, domain account lockouts, and VPN issues with 98% SLA compliance.
+• Managed user onboarding, offboarding, and group permissions in Active Directory and Office 365.
+• Troubleshoot DNS and IP conflict issues using ipconfig, nslookup, ping, and traceroute.`,
+
+  desktopsupport: `SANDEEP VERMA
+Email: sandeep.desktop@email.com | Certifications: CompTIA A+, Microsoft Modern Desktop Administrator
+
+SUMMARY
+Desktop Support Engineer with 2+ years of hands-on experience diagnosing hardware, operating systems (Windows & macOS), printer peripherals, system imaging, and endpoint troubleshooting.
+
+TECHNICAL SKILLS
+• Hardware: Laptop/Desktop assembly, RAM/SSD upgrades, Motherboards, Power Supplies, BIOS/UEFI
+• OS & Diagnostics: Windows 10/11 Pro, BSOD analysis (WinDbg, BlueScreenView), Safe Mode, Event Viewer
+• Tools & Deployment: Sysprep, Windows Deployment Services (WDS), Macrium Reflect, BitLocker
+• Office & Peripherals: MS Office 365, Print Spooler, Network Printers, Scanners, Docking Stations
+
+EXPERIENCE & PROJECTS
+1. Corporate Endpoint Management & Imaging
+• Deployed and configured 200+ corporate laptops using standard Sysprep gold images and BitLocker drive encryption.
+• Diagnosed and resolved blue screen (BSOD) driver crashes, RAM faults, and thermal throttling issues.
+• Managed office network printer queues and resolved print spooler failures across 3 office floors.`
 };
 
 export default function SetupScreen({ onStartInterview }) {
@@ -92,7 +184,17 @@ export default function SetupScreen({ onStartInterview }) {
     const selectedRole = e.target.value;
     setRole(selectedRole);
     if (!uploadedFileName) {
-      if (selectedRole.includes('Front')) {
+      if (selectedRole.includes('AWS')) {
+        setResumeText(SAMPLE_RESUMES.aws);
+      } else if (selectedRole.includes('DevOps')) {
+        setResumeText(SAMPLE_RESUMES.devops);
+      } else if (selectedRole.includes('Linux')) {
+        setResumeText(SAMPLE_RESUMES.linux);
+      } else if (selectedRole.includes('IT Support')) {
+        setResumeText(SAMPLE_RESUMES.itsupport);
+      } else if (selectedRole.includes('Desktop Support')) {
+        setResumeText(SAMPLE_RESUMES.desktopsupport);
+      } else if (selectedRole.includes('Front')) {
         setResumeText(SAMPLE_RESUMES.frontend);
       } else if (selectedRole.includes('Back')) {
         setResumeText(SAMPLE_RESUMES.backend);
@@ -259,10 +361,21 @@ export default function SetupScreen({ onStartInterview }) {
               value={role}
               onChange={handleRoleChange}
             >
-              <option value="Full Stack Engineer (React & Node.js)">Full Stack Engineer (React & Node.js)</option>
-              <option value="Frontend Developer (React & TypeScript)">Frontend Developer (React & TypeScript)</option>
-              <option value="Backend Developer (Node.js & Python)">Backend Developer (Node.js & Distributed Systems)</option>
-              <option value="Data Analyst / Data Scientist">Data Analyst / Data Scientist</option>
+              <optgroup label="Cloud & Infrastructure">
+                <option value="AWS Cloud Engineer (Solutions Architect & Infrastructure)">AWS Cloud Engineer (VPC, EC2, IAM, S3 & Cloud Architecture)</option>
+                <option value="DevOps Engineer (CI/CD, Docker & Kubernetes)">DevOps Engineer (CI/CD, Docker, Kubernetes & Terraform)</option>
+                <option value="Linux System Administrator (RHEL, Ubuntu & Bash)">Linux System Administrator (RHEL, Ubuntu, systemd & Networking)</option>
+              </optgroup>
+              <optgroup label="IT & Technical Support">
+                <option value="IT Support Specialist (Active Directory & Network Troubleshooting)">IT Support Specialist (Active Directory, DNS, VPN & Office 365)</option>
+                <option value="Desktop Support Engineer (Hardware, OS & Diagnostics)">Desktop Support Engineer (Hardware, BSOD, Printers & Endpoint Support)</option>
+              </optgroup>
+              <optgroup label="Software Engineering & Data">
+                <option value="Full Stack Engineer (React & Node.js)">Full Stack Engineer (React & Node.js)</option>
+                <option value="Frontend Developer (React & TypeScript)">Frontend Developer (React & TypeScript)</option>
+                <option value="Backend Developer (Node.js & Python)">Backend Developer (Node.js & Distributed Systems)</option>
+                <option value="Data Analyst / Data Scientist">Data Analyst / Data Scientist</option>
+              </optgroup>
             </select>
           </div>
 
@@ -412,28 +525,49 @@ export default function SetupScreen({ onStartInterview }) {
           </div>
 
           {/* Quick preset buttons */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '18px' }}>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Or use template:</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '18px', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Load Role Template:</span>
             <button
               type="button"
-              onClick={() => setResumeText(SAMPLE_RESUMES.fullstack)}
-              style={{ background: 'rgba(255,255,255,0.06)', border: 'none', color: '#cbd5e1', padding: '4px 10px', borderRadius: '4px', fontSize: '0.72rem', cursor: 'pointer' }}
+              onClick={() => { setResumeText(SAMPLE_RESUMES.aws); setRole('AWS Cloud Engineer (Solutions Architect & Infrastructure)'); setUploadedFileName(''); }}
+              style={{ background: 'rgba(255,255,255,0.06)', border: 'none', color: '#38bdf8', padding: '4px 8px', borderRadius: '4px', fontSize: '0.72rem', cursor: 'pointer', fontWeight: 600 }}
+            >
+              ☁️ AWS Cloud
+            </button>
+            <button
+              type="button"
+              onClick={() => { setResumeText(SAMPLE_RESUMES.devops); setRole('DevOps Engineer (CI/CD, Docker & Kubernetes)'); setUploadedFileName(''); }}
+              style={{ background: 'rgba(255,255,255,0.06)', border: 'none', color: '#a78bfa', padding: '4px 8px', borderRadius: '4px', fontSize: '0.72rem', cursor: 'pointer', fontWeight: 600 }}
+            >
+              ⚡ DevOps
+            </button>
+            <button
+              type="button"
+              onClick={() => { setResumeText(SAMPLE_RESUMES.linux); setRole('Linux System Administrator (RHEL, Ubuntu & Bash)'); setUploadedFileName(''); }}
+              style={{ background: 'rgba(255,255,255,0.06)', border: 'none', color: '#fbbf24', padding: '4px 8px', borderRadius: '4px', fontSize: '0.72rem', cursor: 'pointer', fontWeight: 600 }}
+            >
+              🐧 Linux Admin
+            </button>
+            <button
+              type="button"
+              onClick={() => { setResumeText(SAMPLE_RESUMES.itsupport); setRole('IT Support Specialist (Active Directory & Network Troubleshooting)'); setUploadedFileName(''); }}
+              style={{ background: 'rgba(255,255,255,0.06)', border: 'none', color: '#34d399', padding: '4px 8px', borderRadius: '4px', fontSize: '0.72rem', cursor: 'pointer', fontWeight: 600 }}
+            >
+              🎫 IT Support
+            </button>
+            <button
+              type="button"
+              onClick={() => { setResumeText(SAMPLE_RESUMES.desktopsupport); setRole('Desktop Support Engineer (Hardware, OS & Diagnostics)'); setUploadedFileName(''); }}
+              style={{ background: 'rgba(255,255,255,0.06)', border: 'none', color: '#f472b6', padding: '4px 8px', borderRadius: '4px', fontSize: '0.72rem', cursor: 'pointer', fontWeight: 600 }}
+            >
+              💻 Desktop Support
+            </button>
+            <button
+              type="button"
+              onClick={() => { setResumeText(SAMPLE_RESUMES.fullstack); setRole('Full Stack Engineer (React & Node.js)'); setUploadedFileName(''); }}
+              style={{ background: 'rgba(255,255,255,0.06)', border: 'none', color: '#cbd5e1', padding: '4px 8px', borderRadius: '4px', fontSize: '0.72rem', cursor: 'pointer' }}
             >
               Full Stack
-            </button>
-            <button
-              type="button"
-              onClick={() => setResumeText(SAMPLE_RESUMES.frontend)}
-              style={{ background: 'rgba(255,255,255,0.06)', border: 'none', color: '#cbd5e1', padding: '4px 10px', borderRadius: '4px', fontSize: '0.72rem', cursor: 'pointer' }}
-            >
-              Frontend
-            </button>
-            <button
-              type="button"
-              onClick={() => setResumeText(SAMPLE_RESUMES.backend)}
-              style={{ background: 'rgba(255,255,255,0.06)', border: 'none', color: '#cbd5e1', padding: '4px 10px', borderRadius: '4px', fontSize: '0.72rem', cursor: 'pointer' }}
-            >
-              Backend
             </button>
           </div>
 

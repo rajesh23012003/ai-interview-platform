@@ -133,6 +133,141 @@ const ROLE_KNOWLEDGE_BASE = {
         idealAnswer: 'To mitigate overfitting: 1) Constrain tree depth (max_depth) and set minimum samples per leaf (min_child_weight); 2) Use feature subsampling (colsample_bytree) and row subsampling; 3) Use K-Fold Cross Validation; 4) For gradient boosting, use lower learning rates with early stopping on validation loss.'
       }
     ]
+  },
+  'devops': {
+    title: 'DevOps Engineer',
+    coreSkills: ['Kubernetes', 'Docker', 'Terraform', 'CI/CD', 'Jenkins', 'GitHub Actions', 'Prometheus', 'Ansible', 'Linux'],
+    questionBank: [
+      {
+        question: 'Explain the Kubernetes architecture. When a Pod gets stuck in CrashLoopBackOff, walk me through your exact troubleshooting methodology.',
+        category: 'Container Orchestration',
+        difficulty: 'Hard',
+        expectedPoints: ['Control Plane vs Worker Nodes', 'kubectl describe pod for events', 'kubectl logs --previous for exit code', 'OOMKilled memory limits or application failure'],
+        idealAnswer: 'Kubernetes separates the Control Plane (API Server, etcd, Scheduler, Controller Manager) from Worker Nodes (Kubelet, Kube-Proxy, Container Runtime). For a CrashLoopBackOff: 1) Run `kubectl describe pod <name>` to view container exit codes (e.g., exit 137 means OOMKilled, exit 1 indicates app crash); 2) Inspect previous crash output using `kubectl logs <name> --previous`; 3) Check resource requests/limits, missing ConfigMaps/Secrets, or database connectivity timeouts.'
+      },
+      {
+        question: 'How do you structure a production Terraform setup with remote state, locking, and multi-environment isolation (Dev, Staging, Prod)?',
+        category: 'Infrastructure as Code',
+        difficulty: 'Medium',
+        expectedPoints: ['S3 backend with encryption and versioning', 'DynamoDB state locking table', 'Directory-based or workspace separation', 'Reusable custom modules'],
+        idealAnswer: 'A production Terraform setup uses an Amazon S3 remote backend with server-side encryption and object versioning, coupled with a DynamoDB table for distributed state locking to prevent concurrent runs. Isolate environments using dedicated directory structures (e.g., `environments/prod`, `environments/dev`) with environment-specific tfvars, referencing shared versioned modules from a central repository.'
+      },
+      {
+        question: 'Contrast Blue/Green Deployment versus Canary Deployment in a zero-downtime microservices architecture.',
+        category: 'CI/CD & Release Strategies',
+        difficulty: 'Medium',
+        expectedPoints: ['Blue/Green identical duplicate environments', 'Canary gradual percentage traffic rollouts (e.g. 5% to 100%)', 'Instant rollback in Blue/Green via DNS/router', 'Telemetry and automated metric rollbacks in Canary'],
+        idealAnswer: 'Blue/Green maintains two identical production environments; active traffic points to Blue, the new release deploys to Green, and router/DNS switches all traffic over with instantaneous rollback capability. Canary deploys the new release alongside existing pods and routes a small fraction (e.g., 5-10%) of live traffic, monitoring error rates via Prometheus before incrementally scaling up to 100%.'
+      }
+    ]
+  },
+  'aws': {
+    title: 'AWS Cloud Engineer',
+    coreSkills: ['AWS VPC', 'EC2', 'IAM', 'S3', 'CloudWatch', 'Lambda', 'ALB', 'RDS', 'CloudFront', 'Route53'],
+    questionBank: [
+      {
+        question: 'Design a highly available, fault-tolerant, 3-tier web application architecture on AWS. Detail your VPC, subnet, and security layout.',
+        category: 'Cloud Architecture & VPC',
+        difficulty: 'Hard',
+        expectedPoints: ['Multi-AZ VPC with Public, Private App, and Private DB subnets', 'Internet Gateway & NAT Gateways', 'ALB in public subnet', 'Auto Scaling Group in private app subnet', 'Multi-AZ RDS in isolated database subnet'],
+        idealAnswer: 'Create a Multi-AZ VPC across at least 2 Availability Zones. The Presentation tier sits in Public Subnets behind an Application Load Balancer with an Internet Gateway. The Application tier runs in Private Subnets on EC2 Auto Scaling Groups, accessing outbound internet via NAT Gateways. The Data tier resides in isolated Database Subnets hosting Multi-AZ Amazon RDS with synchronous replication. Security Groups enforce least-privilege chaining: DB accepts traffic only from App tier; App tier accepts traffic only from ALB.'
+      },
+      {
+        question: 'Explain the difference between Security Groups and Network Access Control Lists (NACLs) in AWS VPC.',
+        category: 'Cloud Security & Networking',
+        difficulty: 'Medium',
+        expectedPoints: ['Security Group is stateful at instance/ENI level', 'NACL is stateless at subnet boundary', 'NACL evaluates numbered allow/deny rules in order', 'Security Group allows all return traffic automatically'],
+        idealAnswer: 'Security Groups operate at the individual instance/ENI level and are stateful: if inbound traffic is allowed, corresponding outbound response traffic is automatically allowed. They only support ALLOW rules. In contrast, NACLs operate at the subnet boundary and are stateless: return traffic must be explicitly permitted. NACLs support both ALLOW and DENY rules, evaluating rules in ascending numerical order.'
+      },
+      {
+        question: 'How do IAM Roles, IAM Policies, and the AWS Security Token Service (STS) work together for secure cross-service access?',
+        category: 'Identity & Access Management',
+        difficulty: 'Medium',
+        expectedPoints: ['IAM Roles assume temporary credentials via STS', 'No long-lived access keys embedded in code', 'IAM Policy JSON defining effect, action, resource', 'Instance profiles for EC2'],
+        idealAnswer: 'Instead of embedding long-lived AWS Access Keys in applications, services use IAM Roles attached via Instance Profiles or ECS Task Roles. Under the hood, AWS STS (Security Token Service) issues short-lived, automatically rotated credentials (access key, secret key, and session token) to the instance metadata service (IMDSv2). IAM Policies written in JSON define the exact Actions, Effects (Allow/Deny), and Resource ARNs permitted.'
+      }
+    ]
+  },
+  'linux': {
+    title: 'Linux System Administrator',
+    coreSkills: ['Linux', 'Bash Scripting', 'systemd', 'Networking', 'SSH', 'Storage/LVM', 'User Management', 'Performance Tuning'],
+    questionBank: [
+      {
+        question: 'A Linux production server is experiencing 100% CPU utilization and unresponsiveness. Walk me through your command-line diagnostic steps.',
+        category: 'System Diagnostics & Troubleshooting',
+        difficulty: 'Hard',
+        expectedPoints: ['top / htop / uptime for load averages', 'vmstat 1 for CPU/memory/swapping queues', 'iostat -xz for disk I/O bottlenecks', 'ps aux --sort=-%cpu to pinpoint PID', 'strace or killing with kill -15 before kill -9'],
+        idealAnswer: '1) Check load averages using `uptime` and `top`/`htop` to see if the bottleneck is CPU bound or I/O wait (`%wa`). 2) Run `vmstat 1` to check runnable process queues and memory swapping. 3) Use `ps aux --sort=-%cpu | head -n 10` to identify offending PIDs. 4) If disk I/O is high, use `iostat -xz 1` and `iotop`. 5) Terminate offending processes gracefully with `kill -15 <PID>` before escalating to `kill -9` if unresponsive.'
+      },
+      {
+        question: 'Explain the Linux boot process from the moment hardware powers on to the user login shell.',
+        category: 'Operating System Internals',
+        difficulty: 'Medium',
+        expectedPoints: ['BIOS/UEFI POST initialization', 'Master Boot Record (MBR) / EFI System Partition', 'GRUB2 bootloader', 'Kernel initialization and initramfs/initrd', 'systemd PID 1 default target'],
+        idealAnswer: '1) BIOS/UEFI executes POST and loads boot device. 2) GRUB2 bootloader is executed from MBR/EFI, displaying kernel options. 3) GRUB loads the Linux Kernel and initramfs into RAM. 4) The kernel initializes hardware drivers and mounts root filesystem via initramfs. 5) Kernel starts PID 1 (`/sbin/init` or `systemd`), which executes default target units (e.g. multi-user.target or graphical.target), starting background daemons and login getty shells.'
+      },
+      {
+        question: 'What are SUID, SGID, and Sticky Bit in Linux file permissions, and when is each used?',
+        category: 'File System Security & Permissions',
+        difficulty: 'Medium',
+        expectedPoints: ['SUID (4) executes file with owner privileges (e.g. /usr/bin/passwd)', 'SGID (2) executes with group privileges and inherits directory group', 'Sticky bit (1) prevents deletion except by owner (e.g. /tmp)'],
+        idealAnswer: 'Special permission bits: 1) SUID (SetUID, octal 4000): When an executable has SUID, any user runs it with the permissions of the file owner (e.g., `/usr/bin/passwd` allows normal users to update `/etc/shadow`). 2) SGID (SetGID, octal 2000): Executables run with group permissions; on directories, newly created files inherit the parent directory group. 3) Sticky Bit (octal 1000): Applied to shared directories like `/tmp` where all users have write access, ensuring only the file owner or root can delete or rename files.'
+      }
+    ]
+  },
+  'itsupport': {
+    title: 'IT Support Specialist',
+    coreSkills: ['Active Directory', 'DNS/DHCP', 'Networking (TCP/IP)', 'Windows Server', 'VPN', 'Ticketing Tools (ServiceNow/Jira)', 'Office 365'],
+    questionBank: [
+      {
+        question: 'A user calls reporting: "My computer has no internet access." How do you systematically isolate and resolve the issue?',
+        category: 'Network Troubleshooting',
+        difficulty: 'Medium',
+        expectedPoints: ['Physical layer check (cable/Wi-Fi LED)', 'ipconfig for 169.254.x.x APIPA vs valid IP', 'Ping localhost 127.0.0.1 (NIC test)', 'Ping default gateway', 'Ping 8.8.8.8 vs domain name for DNS resolution'],
+        idealAnswer: 'I follow a bottom-up OSI troubleshooting approach: 1) Physical Layer: Check Ethernet cable link lights or Wi-Fi connectivity. 2) Data Link & Network: Run `ipconfig /all`. If IP is 169.254.x.x (APIPA), DHCP is unreachable; run `ipconfig /release` and `ipconfig /renew`. 3) Ping loopback `127.0.0.1` to confirm TCP/IP stack health. 4) Ping Default Gateway to test local router communication. 5) Ping public IP (`8.8.8.8`); if successful but browsing fails, it is a DNS issue — run `nslookup google.com` and `ipconfig /flushdns`.'
+      },
+      {
+        question: 'How do you troubleshoot a user unable to log into their Windows domain account or access Active Directory network shares?',
+        category: 'Active Directory & Identity',
+        difficulty: 'Medium',
+        expectedPoints: ['Check if account is locked out or password expired in ADUC', 'Verify domain controller network connectivity', 'Time synchronization skew between client and DC (Kerberos requires <5 mins)', 'Group Policy update with gpupdate /force'],
+        idealAnswer: '1) In Active Directory Users and Computers (ADUC), check if the user account is locked, disabled, or if password expired. 2) Verify network connectivity and DNS points to the internal Domain Controller. 3) Check system clock: Kerberos authentication fails if workstation time is skewed by more than 5 minutes from the DC. 4) Run `gpupdate /force` and inspect event logs (`eventvwr.msc`) under Security for failed logon Event ID 4625.'
+      },
+      {
+        question: 'A user reports that Microsoft Outlook is repeatedly prompting for a password and emails are stuck in the Outbox. What are your troubleshooting steps?',
+        category: 'Office 365 & Application Support',
+        difficulty: 'Medium',
+        expectedPoints: ['Check Windows Credential Manager and clear cached credentials', 'Verify Modern Authentication (MFA prompt)', 'Run Outlook in Safe Mode (outlook.exe /safe) to check faulty add-ins', 'Rebuild Outlook profile in Control Panel Mail'],
+        idealAnswer: '1) Verify user credentials and MFA status in Microsoft 365 Admin Center. 2) Open Windows Credential Manager and remove outdated cached generic credentials for Office/Outlook. 3) Test Outlook in Safe Mode (`outlook.exe /safe`) to rule out misbehaving third-party add-ins. 4) Check mailbox storage limits and attachment size in Outbox. 5) If unresolved, create a clean new Outlook profile via Control Panel -> Mail.'
+      }
+    ]
+  },
+  'desktopsupport': {
+    title: 'Desktop Support Engineer',
+    coreSkills: ['Windows 10/11', 'Hardware Diagnostics', 'BitLocker', 'Printer Troubleshooting', 'Driver Management', 'Remote Desktop', 'OS Imaging'],
+    questionBank: [
+      {
+        question: 'A workstation experiences recurring Blue Screen of Death (BSOD) crashes. How do you analyze the root cause and resolve it?',
+        category: 'OS Diagnostics & Hardware',
+        difficulty: 'Medium',
+        expectedPoints: ['Note BSOD Stop Code (e.g. CRITICAL_PROCESS_DIED, MEMORY_MANAGEMENT)', 'Inspect Minidump files using WinDbg or BlueScreenView', 'Run Windows Memory Diagnostic (mdsched.exe)', 'Boot into Safe Mode, update/rollback faulty hardware drivers, run sfc /scannow and DISM'],
+        idealAnswer: '1) Note the exact Stop Code (e.g., `DRIVER_IRQL_NOT_LESS_OR_EQUAL` or `PAGE_FAULT_IN_NONPAGED_AREA`). 2) Boot into Safe Mode and extract minidump files from `C:\\Windows\\Minidump` using BlueScreenView or WinDbg to pinpoint the responsible `.sys` driver. 3) Run `sfc /scannow` and `DISM /Online /Cleanup-Image /RestoreHealth` to repair corrupted Windows system files. 4) Run `mdsched.exe` to test RAM for hardware defects. 5) Rollback or clean-install recent GPU, chipset, or network drivers.'
+      },
+      {
+        question: 'A network shared printer in the office is showing as "Offline" for all users and jobs are stuck in queue. How do you resolve this?',
+        category: 'Peripherals & Hardware',
+        difficulty: 'Easy',
+        expectedPoints: ['Ping printer IP address to verify connectivity', 'Restart Windows Print Spooler service (net stop spooler && net start spooler)', 'Clear stuck print jobs in C:\\Windows\\System32\\spool\\PRINTERS', 'Check SNMP status on print server port configuration'],
+        idealAnswer: '1) Ping the printer\'s static IP from command line to verify physical and network connectivity. 2) Access the print server: stop the Print Spooler service (`net stop spooler`), clear all temporary `.spl` and `.shd` files in `C:\\Windows\\System32\\spool\\PRINTERS`, then restart with `net start spooler`. 3) Verify the printer port settings in Printer Properties; uncheck "SNMP Status Enabled" if SNMP timeouts are causing false offline states.'
+      },
+      {
+        question: 'How do you prepare a fleet of new corporate laptops for deployment using Sysprep and disk imaging / Intune Autopilot?',
+        category: 'Deployment & Imaging',
+        difficulty: 'Medium',
+        expectedPoints: ['Generalizing OS using sysprep /generalize /oobe /shutdown', 'BitLocker drive encryption keys backed up to Azure AD / AD', 'Modern cloud deployment via Microsoft Intune Autopilot profiles', 'Standard base applications and security endpoint agents'],
+        idealAnswer: 'For modern corporate environments: 1) Hardware hashes are registered in Microsoft Intune Autopilot for zero-touch cloud provisioning. 2) For gold-master image setups: configure reference OS, run `sysprep.exe /generalize /oobe /shutdown` to strip unique SIDs and machine-specific drivers before capturing the image via WDS/Clonezilla. 3) Ensure BitLocker recovery keys automatically escrow to Active Directory or Entra ID, and verify endpoint antivirus (EDR) agents register on first boot.'
+      }
+    ]
   }
 };
 
@@ -204,9 +339,24 @@ function parseResume(resumeText) {
 function getQuestionsForRole(roleKey, resumeAnalysis = null) {
   const normalizedKey = roleKey ? roleKey.toLowerCase() : 'fullstack';
   let categoryKey = 'fullstack';
-  if (normalizedKey.includes('front')) categoryKey = 'frontend';
-  else if (normalizedKey.includes('back')) categoryKey = 'backend';
-  else if (normalizedKey.includes('data') || normalizedKey.includes('analyst') || normalizedKey.includes('python')) categoryKey = 'datascience';
+
+  if (normalizedKey.includes('devops') || normalizedKey.includes('kubernetes') || normalizedKey.includes('ci/cd')) {
+    categoryKey = 'devops';
+  } else if (normalizedKey.includes('aws') || normalizedKey.includes('cloud')) {
+    categoryKey = 'aws';
+  } else if (normalizedKey.includes('linux') || normalizedKey.includes('sysadmin') || normalizedKey.includes('system admin')) {
+    categoryKey = 'linux';
+  } else if (normalizedKey.includes('desktop') || normalizedKey.includes('desktop support')) {
+    categoryKey = 'desktopsupport';
+  } else if (normalizedKey.includes('it support') || normalizedKey.includes('helpdesk') || normalizedKey.includes('service desk') || normalizedKey.includes('support')) {
+    categoryKey = 'itsupport';
+  } else if (normalizedKey.includes('front')) {
+    categoryKey = 'frontend';
+  } else if (normalizedKey.includes('back')) {
+    categoryKey = 'backend';
+  } else if (normalizedKey.includes('data') || normalizedKey.includes('analyst') || normalizedKey.includes('python')) {
+    categoryKey = 'datascience';
+  }
 
   const roleConfig = ROLE_KNOWLEDGE_BASE[categoryKey] || ROLE_KNOWLEDGE_BASE['fullstack'];
   const questions = [...roleConfig.questionBank];
