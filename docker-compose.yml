@@ -1,0 +1,16 @@
+services:
+  prepmind-ai:
+    build: .
+    container_name: prepmind-ai-platform
+    restart: always
+    ports:
+      - "80:5050"
+      - "5050:5050"
+    environment:
+      - PORT=5050
+      - NODE_ENV=production
+    volumes:
+      - prepmind_db:/app/backend/db_data
+
+volumes:
+  prepmind_db:

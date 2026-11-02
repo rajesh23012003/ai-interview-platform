@@ -18,6 +18,34 @@ app.use(express.json({ limit: '10mb' }));
 const frontendDist = path.join(__dirname, '../frontend/dist');
 app.use(express.static(frontendDist));
 
+// Helper function to extract text from PDF buffer
+async function extractTextFromPdf(buffer) {
+  // Support pdf-parse v1 (callable function)
+  if (typeof pdfParse === 'function') {
+    const data = await pdfParse(buffer);
+    return (data && data.text) ? data.text : '';
+  }
+  // Support pdf-parse v2 (PDFParse class)
+  if (pdfParse && pdfParse.PDFParse) {
+    const parser = new pdfParse.PDFParse({ data: buffer });
+    const result = await parser.getText();
+    if (typeof parser.destroy === 'function') {
+      try {
+        await parser.destroy();
+      } catch (e) {
+        // ignore cleanup error
+      }
+    }
+    return (result && result.text) ? result.text : '';
+  }
+  // Support default export if any
+  if (pdfParse && typeof pdfParse.default === 'function') {
+    const data = await pdfParse.default(buffer);
+    return (data && data.text) ? data.text : '';
+  }
+  throw new Error('PDF parser engine could not be initialized.');
+}
+
 // -------------------------------------------------------------
 // 1. RESUME ANALYZER & FILE UPLOAD API
 // -------------------------------------------------------------
@@ -31,13 +59,34 @@ app.post('/api/resume/upload', upload.single('resume_file'), async (req, res) =>
     const isPdf = req.file.mimetype === 'application/pdf' || req.file.originalname.toLowerCase().endsWith('.pdf');
 
     if (isPdf) {
-      const pdfData = await pdfParse(req.file.buffer);
-      extractedText = pdfData.text || '';
+      try {
+        extractedText = await extractTextFromPdf(req.file.buffer);
+      } catch (pdfErr) {
+        console.error('PDF Parse detailed error:', pdfErr);
+        // Fallback: try regex extraction if text stream is embedded
+        const rawFallback = req.file.buffer.toString('latin1');
+        const textMatches = rawFallback.match(/\(([^()]+)\)\s*Tj/g);
+        if (textMatches && textMatches.length > 5) {
+          extractedText = textMatches.map(m => m.replace(/^\(|\)\s*Tj$/g, '')).join(' ');
+        } else {
+          return res.status(400).json({
+            success: false,
+            message: 'PDF file padhne me samasya aayi. Kripya valid text PDF upload karein ya resume text paste karein.'
+          });
+        }
+      }
     } else {
       extractedText = req.file.buffer.toString('utf-8');
     }
 
     const cleanText = extractedText.replace(/\r\n/g, '\n').trim();
+    if (!cleanText || cleanText.length < 5) {
+      return res.status(400).json({
+        success: false,
+        message: 'PDF me se readable text nahi mila (ho sakta hai PDF scanned photo ho). Kripya resume text directly paste karein.'
+      });
+    }
+
     const analysis = aiEngine.parseResume(cleanText);
 
     res.json({
@@ -119,6 +168,7 @@ app.post('/api/interview/start', (req, res) => {
         id: qRes.lastInsertRowid,
         question_number: idx + 1,
         question_text: q.question,
+        hindi_question: q.hindi_question || '',
         category: q.category,
         difficulty: q.difficulty || 'Medium'
       });

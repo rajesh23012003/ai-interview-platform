@@ -11,6 +11,7 @@ const ROLE_KNOWLEDGE_BASE = {
     questionBank: [
       {
         question: 'Explain the difference between Virtual DOM and Shadow DOM, and how React uses reconciliation with the Fiber architecture.',
+        hindi_question: 'Virtual DOM aur Shadow DOM mein kya difference hota hai, aur React reconciliation process mein Fiber architecture ka use kaise karta hai?',
         category: 'Core React & Architecture',
         difficulty: 'Medium',
         expectedPoints: ['Virtual DOM in-memory representation', 'Shadow DOM browser scoped encapsulation', 'Reconciliation diffing algorithm', 'Fiber incremental rendering and prioritization'],
@@ -18,6 +19,7 @@ const ROLE_KNOWLEDGE_BASE = {
       },
       {
         question: 'How do you optimize Core Web Vitals (LCP, INP/FID, CLS) in a modern single-page React or Next.js application?',
+        hindi_question: 'React ya Next.js application mein Core Web Vitals jaise LCP, INP, aur CLS ko optimize karne ke liye aap kaunsi strategies use karte hain?',
         category: 'Web Performance',
         difficulty: 'Hard',
         expectedPoints: ['LCP image preloading and SSR', 'INP/FID main thread scheduling and code splitting', 'CLS aspect-ratio and dimension reservations', 'Dynamic imports'],
@@ -25,6 +27,7 @@ const ROLE_KNOWLEDGE_BASE = {
       },
       {
         question: 'What happens under the hood when a user types an address into a browser and presses Enter? Focus specifically on client rendering.',
+        hindi_question: 'Jab koi user browser mein URL type karke Enter press karta hai, toh DNS resolution se lekar client rendering (DOM, CSSOM, Paint) tak kya-kya steps hote hain?',
         category: 'Browser Fundamentals',
         difficulty: 'Medium',
         expectedPoints: ['DNS lookup', 'TCP/TLS handshake', 'HTTP request/response', 'HTML parsing to DOM tree', 'CSSOM construction', 'Render tree, Layout/Reflow, and Paint'],
@@ -32,6 +35,7 @@ const ROLE_KNOWLEDGE_BASE = {
       },
       {
         question: 'How do you prevent memory leaks and handle state cleanup in complex React applications with subscriptions or WebSockets?',
+        hindi_question: 'React applications mein memory leaks kaise prevent karte hain, aur useEffect mein WebSockets ya subscriptions ka cleanup kaise kiya jata hai?',
         category: 'State Management & Lifecycle',
         difficulty: 'Medium',
         expectedPoints: ['useEffect cleanup function', 'AbortController for fetch calls', 'Socket disconnect and event listener removal', 'Clearing setTimeout/setInterval'],
@@ -45,6 +49,7 @@ const ROLE_KNOWLEDGE_BASE = {
     questionBank: [
       {
         question: 'How does the Node.js Event Loop work with Libuv? Contrast microtasks versus macrotasks with code execution order.',
+        hindi_question: 'Node.js ka Event Loop Libuv ke sath kaise kaam karta hai? Microtasks aur Macrotasks ke execution order ko detail mein samjhaiye.',
         category: 'Node.js Internals',
         difficulty: 'Hard',
         expectedPoints: ['Libuv event loop phases', 'Call stack', 'process.nextTick queue', 'Promise microtasks', 'Timers and I/O callbacks'],
@@ -52,6 +57,7 @@ const ROLE_KNOWLEDGE_BASE = {
       },
       {
         question: 'How would you scale a relational database (PostgreSQL/MySQL) when table row counts grow into hundreds of millions?',
+        hindi_question: 'Jab database tables mein millions of rows ho jayein, toh PostgreSQL ya MySQL ko scale karne ke liye indexing, partitioning aur caching kaise implement karenge?',
         category: 'Database Scaling & Architecture',
         difficulty: 'Hard',
         expectedPoints: ['Indexing (B-Tree, BRIN)', 'Read replicas and connection pooling', 'Table partitioning (range/hash)', 'Sharding', 'Caching with Redis'],
@@ -59,6 +65,7 @@ const ROLE_KNOWLEDGE_BASE = {
       },
       {
         question: 'Explain how you design idempotency in REST APIs, specifically for payment processing and critical transactions.',
+        hindi_question: 'Payment processing aur critical transactions ke liye REST APIs mein Idempotency kaise design ki jaati hai?',
         category: 'API Design & Resilience',
         difficulty: 'Medium',
         expectedPoints: ['Idempotency-Key header', 'Distributed locks or unique constraints', 'Storing request state and cached response in DB/Redis', 'Atomic transactions'],
@@ -66,6 +73,7 @@ const ROLE_KNOWLEDGE_BASE = {
       },
       {
         question: 'Walk me through designing a robust JWT authentication flow with Refresh Tokens and token revocation.',
+        hindi_question: 'Refresh Tokens aur Token Revocation ke sath ek secure JWT authentication flow ka architecture samjhaiye.',
         category: 'Security & Auth',
         difficulty: 'Medium',
         expectedPoints: ['Short-lived Access Token in memory', 'Long-lived Refresh Token in httpOnly cookie', 'Refresh token rotation', 'Blacklisting/Revocation table in Redis'],
@@ -79,6 +87,7 @@ const ROLE_KNOWLEDGE_BASE = {
     questionBank: [
       {
         question: 'Walk me through the end-to-end architecture of a real-time messaging application like Slack or WhatsApp Web.',
+        hindi_question: 'Slack ya WhatsApp Web jaisi real-time messaging app ka end-to-end architecture explain kijiye, WebSockets aur message brokers ke sath.',
         category: 'Full Stack System Design',
         difficulty: 'Hard',
         expectedPoints: ['WebSockets connection handling', 'Load balancer with sticky sessions', 'Pub/Sub message broker (Redis/Kafka)', 'Message persistence (NoSQL/SQL)', 'Offline delivery queue'],
@@ -86,6 +95,7 @@ const ROLE_KNOWLEDGE_BASE = {
       },
       {
         question: 'How do you handle transactional consistency across multiple microservices or distributed components (Saga Pattern vs 2PC)?',
+        hindi_question: 'Multiple microservices mein transactional consistency kaise handle karte hain? Saga Pattern aur Two-Phase Commit (2PC) mein kya difference hai?',
         category: 'Distributed Systems',
         difficulty: 'Hard',
         expectedPoints: ['Saga pattern (Choreography vs Orchestration)', 'Compensating transactions', 'Eventual consistency', 'Idempotent consumer'],
@@ -93,6 +103,7 @@ const ROLE_KNOWLEDGE_BASE = {
       },
       {
         question: 'What are the main security vulnerabilities outlined in OWASP Top 10 (like SQLi, XSS, CSRF, SSRF) and how do you mitigate each?',
+        hindi_question: 'OWASP Top 10 ki main security vulnerabilities jaise SQL Injection, XSS, CSRF, aur SSRF ko kaise prevent karte hain?',
         category: 'Application Security',
         difficulty: 'Medium',
         expectedPoints: ['SQL Injection: parameterized queries', 'XSS: input sanitization and CSP', 'CSRF: SameSite cookies and CSRF tokens', 'SSRF: IP allowlisting and metadata protection'],
@@ -100,6 +111,7 @@ const ROLE_KNOWLEDGE_BASE = {
       },
       {
         question: 'How do you manage frontend state synchronization with server state (e.g., React Query / TanStack Query vs Redux)?',
+        hindi_question: 'Frontend state aur server state synchronization ko TanStack Query aur Redux ke through kaise optimize kiya jata hai?',
         category: 'Frontend-Backend Integration',
         difficulty: 'Medium',
         expectedPoints: ['Server state vs client UI state', 'Caching, background refetching, and deduping', 'Optimistic UI updates', 'Stale-while-revalidate strategy'],
@@ -113,6 +125,7 @@ const ROLE_KNOWLEDGE_BASE = {
     questionBank: [
       {
         question: 'Explain how you handle multicollinearity and missing data in a large predictive modeling dataset.',
+        hindi_question: 'Predictive modeling dataset mein multicollinearity (VIF) aur missing data ko handle karne ke kya methods hote hain?',
         category: 'Data Preprocessing & Statistics',
         difficulty: 'Medium',
         expectedPoints: ['VIF (Variance Inflation Factor)', 'Correlation matrix', 'Imputation methods (KNN, iterative, median)', 'Feature elimination or PCA'],
@@ -120,6 +133,7 @@ const ROLE_KNOWLEDGE_BASE = {
       },
       {
         question: 'In SQL, what is the difference between ROW_NUMBER(), RANK(), and DENSE_RANK() window functions?',
+        hindi_question: 'SQL window functions mein ROW_NUMBER(), RANK(), aur DENSE_RANK() ke beech kya exact difference hota hai?',
         category: 'Advanced SQL',
         difficulty: 'Easy',
         expectedPoints: ['ROW_NUMBER gives sequential 1,2,3', 'RANK leaves gaps for ties (1,2,2,4)', 'DENSE_RANK leaves no gaps (1,2,2,3)', 'PARTITION BY and ORDER BY'],
@@ -127,6 +141,7 @@ const ROLE_KNOWLEDGE_BASE = {
       },
       {
         question: 'How do you prevent overfitting in Tree-based models (Random Forest, XGBoost) and measure generalization error?',
+        hindi_question: 'Random Forest aur XGBoost jaise tree-based models mein overfitting kaise rokte hain aur generalization error kaise measure karte hain?',
         category: 'Machine Learning',
         difficulty: 'Medium',
         expectedPoints: ['K-fold cross validation', 'Max depth and min samples leaf pruning', 'Subsampling / colsample_bytree', 'Early stopping and learning rate'],
@@ -140,6 +155,7 @@ const ROLE_KNOWLEDGE_BASE = {
     questionBank: [
       {
         question: 'Explain the Kubernetes architecture. When a Pod gets stuck in CrashLoopBackOff, walk me through your exact troubleshooting methodology.',
+        hindi_question: 'Kubernetes architecture explain kijiye, aur agar koi Pod CrashLoopBackOff mein chala jaye, toh aap usse step-by-step kaise troubleshoot karenge?',
         category: 'Container Orchestration',
         difficulty: 'Hard',
         expectedPoints: ['Control Plane vs Worker Nodes', 'kubectl describe pod for events', 'kubectl logs --previous for exit code', 'OOMKilled memory limits or application failure'],
@@ -147,6 +163,7 @@ const ROLE_KNOWLEDGE_BASE = {
       },
       {
         question: 'How do you structure a production Terraform setup with remote state, locking, and multi-environment isolation (Dev, Staging, Prod)?',
+        hindi_question: 'S3 backend aur DynamoDB state locking ke sath production Terraform setup aur multi-environment isolation kaise create kiya jata hai?',
         category: 'Infrastructure as Code',
         difficulty: 'Medium',
         expectedPoints: ['S3 backend with encryption and versioning', 'DynamoDB state locking table', 'Directory-based or workspace separation', 'Reusable custom modules'],
@@ -154,6 +171,7 @@ const ROLE_KNOWLEDGE_BASE = {
       },
       {
         question: 'Contrast Blue/Green Deployment versus Canary Deployment in a zero-downtime microservices architecture.',
+        hindi_question: 'Zero-downtime microservices architecture mein Blue/Green Deployment aur Canary Deployment mein kya difference aur benefits hain?',
         category: 'CI/CD & Release Strategies',
         difficulty: 'Medium',
         expectedPoints: ['Blue/Green identical duplicate environments', 'Canary gradual percentage traffic rollouts (e.g. 5% to 100%)', 'Instant rollback in Blue/Green via DNS/router', 'Telemetry and automated metric rollbacks in Canary'],
@@ -167,6 +185,7 @@ const ROLE_KNOWLEDGE_BASE = {
     questionBank: [
       {
         question: 'Design a highly available, fault-tolerant, 3-tier web application architecture on AWS. Detail your VPC, subnet, and security layout.',
+        hindi_question: 'AWS par Multi-AZ redundancy, Auto Scaling, aur isolated subnets ke sath ek highly available 3-tier architecture design kijiye.',
         category: 'Cloud Architecture & VPC',
         difficulty: 'Hard',
         expectedPoints: ['Multi-AZ VPC with Public, Private App, and Private DB subnets', 'Internet Gateway & NAT Gateways', 'ALB in public subnet', 'Auto Scaling Group in private app subnet', 'Multi-AZ RDS in isolated database subnet'],
@@ -174,6 +193,7 @@ const ROLE_KNOWLEDGE_BASE = {
       },
       {
         question: 'Explain the difference between Security Groups and Network Access Control Lists (NACLs) in AWS VPC.',
+        hindi_question: 'AWS VPC mein Security Groups aur NACLs ke beech stateful vs stateless aur security boundaries ka kya difference hota hai?',
         category: 'Cloud Security & Networking',
         difficulty: 'Medium',
         expectedPoints: ['Security Group is stateful at instance/ENI level', 'NACL is stateless at subnet boundary', 'NACL evaluates numbered allow/deny rules in order', 'Security Group allows all return traffic automatically'],
@@ -181,6 +201,7 @@ const ROLE_KNOWLEDGE_BASE = {
       },
       {
         question: 'How do IAM Roles, IAM Policies, and the AWS Security Token Service (STS) work together for secure cross-service access?',
+        hindi_question: 'AWS mein IAM Roles, Policies, aur STS temporary credentials ke through secure service access kaise provide karte hain?',
         category: 'Identity & Access Management',
         difficulty: 'Medium',
         expectedPoints: ['IAM Roles assume temporary credentials via STS', 'No long-lived access keys embedded in code', 'IAM Policy JSON defining effect, action, resource', 'Instance profiles for EC2'],
@@ -194,6 +215,7 @@ const ROLE_KNOWLEDGE_BASE = {
     questionBank: [
       {
         question: 'A Linux production server is experiencing 100% CPU utilization and unresponsiveness. Walk me through your command-line diagnostic steps.',
+        hindi_question: 'Agar Linux production server 100% CPU utilization aur high load show kar raha ho, toh aap command-line se issue kaise diagnose aur fix karenge?',
         category: 'System Diagnostics & Troubleshooting',
         difficulty: 'Hard',
         expectedPoints: ['top / htop / uptime for load averages', 'vmstat 1 for CPU/memory/swapping queues', 'iostat -xz for disk I/O bottlenecks', 'ps aux --sort=-%cpu to pinpoint PID', 'strace or killing with kill -15 before kill -9'],
@@ -201,6 +223,7 @@ const ROLE_KNOWLEDGE_BASE = {
       },
       {
         question: 'Explain the Linux boot process from the moment hardware powers on to the user login shell.',
+        hindi_question: 'BIOS/UEFI power-on se lekar GRUB, Kernel, aur systemd target units tak Linux ka boot process samjhaiye.',
         category: 'Operating System Internals',
         difficulty: 'Medium',
         expectedPoints: ['BIOS/UEFI POST initialization', 'Master Boot Record (MBR) / EFI System Partition', 'GRUB2 bootloader', 'Kernel initialization and initramfs/initrd', 'systemd PID 1 default target'],
@@ -208,6 +231,7 @@ const ROLE_KNOWLEDGE_BASE = {
       },
       {
         question: 'What are SUID, SGID, and Sticky Bit in Linux file permissions, and when is each used?',
+        hindi_question: 'Linux file permissions mein SUID, SGID, aur Sticky Bit ka purpose kya hota hai aur inhe kab use kiya jata hai?',
         category: 'File System Security & Permissions',
         difficulty: 'Medium',
         expectedPoints: ['SUID (4) executes file with owner privileges (e.g. /usr/bin/passwd)', 'SGID (2) executes with group privileges and inherits directory group', 'Sticky bit (1) prevents deletion except by owner (e.g. /tmp)'],
@@ -221,6 +245,7 @@ const ROLE_KNOWLEDGE_BASE = {
     questionBank: [
       {
         question: 'A user calls reporting: "My computer has no internet access." How do you systematically isolate and resolve the issue?',
+        hindi_question: 'Agar user ka computer internet se connect nahi ho raha hai, toh OSI model ke hisaab se physical layer se DNS tak kaise troubleshoot karenge?',
         category: 'Network Troubleshooting',
         difficulty: 'Medium',
         expectedPoints: ['Physical layer check (cable/Wi-Fi LED)', 'ipconfig for 169.254.x.x APIPA vs valid IP', 'Ping localhost 127.0.0.1 (NIC test)', 'Ping default gateway', 'Ping 8.8.8.8 vs domain name for DNS resolution'],
@@ -228,6 +253,7 @@ const ROLE_KNOWLEDGE_BASE = {
       },
       {
         question: 'How do you troubleshoot a user unable to log into their Windows domain account or access Active Directory network shares?',
+        hindi_question: 'Active Directory domain user login failure, account lockout, aur Kerberos time skew issue ko kaise diagnose kiya jata hai?',
         category: 'Active Directory & Identity',
         difficulty: 'Medium',
         expectedPoints: ['Check if account is locked out or password expired in ADUC', 'Verify domain controller network connectivity', 'Time synchronization skew between client and DC (Kerberos requires <5 mins)', 'Group Policy update with gpupdate /force'],
@@ -235,6 +261,7 @@ const ROLE_KNOWLEDGE_BASE = {
       },
       {
         question: 'A user reports that Microsoft Outlook is repeatedly prompting for a password and emails are stuck in the Outbox. What are your troubleshooting steps?',
+        hindi_question: 'Outlook repeated password prompt aur outbox stuck emails issue ko Credential Manager aur profile rebuild ke through kaise solve karenge?',
         category: 'Office 365 & Application Support',
         difficulty: 'Medium',
         expectedPoints: ['Check Windows Credential Manager and clear cached credentials', 'Verify Modern Authentication (MFA prompt)', 'Run Outlook in Safe Mode (outlook.exe /safe) to check faulty add-ins', 'Rebuild Outlook profile in Control Panel Mail'],
@@ -248,6 +275,7 @@ const ROLE_KNOWLEDGE_BASE = {
     questionBank: [
       {
         question: 'A workstation experiences recurring Blue Screen of Death (BSOD) crashes. How do you analyze the root cause and resolve it?',
+        hindi_question: 'Windows PC mein bar-bar Blue Screen of Death (BSOD) aane par Minidump analysis aur driver diagnostics kaise karenge?',
         category: 'OS Diagnostics & Hardware',
         difficulty: 'Medium',
         expectedPoints: ['Note BSOD Stop Code (e.g. CRITICAL_PROCESS_DIED, MEMORY_MANAGEMENT)', 'Inspect Minidump files using WinDbg or BlueScreenView', 'Run Windows Memory Diagnostic (mdsched.exe)', 'Boot into Safe Mode, update/rollback faulty hardware drivers, run sfc /scannow and DISM'],
@@ -255,6 +283,7 @@ const ROLE_KNOWLEDGE_BASE = {
       },
       {
         question: 'A network shared printer in the office is showing as "Offline" for all users and jobs are stuck in queue. How do you resolve this?',
+        hindi_question: 'Office network printer offline show hone par Print Spooler service restart aur stuck queue clear kaise ki jaati hai?',
         category: 'Peripherals & Hardware',
         difficulty: 'Easy',
         expectedPoints: ['Ping printer IP address to verify connectivity', 'Restart Windows Print Spooler service (net stop spooler && net start spooler)', 'Clear stuck print jobs in C:\\Windows\\System32\\spool\\PRINTERS', 'Check SNMP status on print server port configuration'],
@@ -262,6 +291,7 @@ const ROLE_KNOWLEDGE_BASE = {
       },
       {
         question: 'How do you prepare a fleet of new corporate laptops for deployment using Sysprep and disk imaging / Intune Autopilot?',
+        hindi_question: 'Corporate laptops ke deployment ke liye Sysprep generalization aur Intune Autopilot setup kaise prepare kiya jata hai?',
         category: 'Deployment & Imaging',
         difficulty: 'Medium',
         expectedPoints: ['Generalizing OS using sysprep /generalize /oobe /shutdown', 'BitLocker drive encryption keys backed up to Azure AD / AD', 'Modern cloud deployment via Microsoft Intune Autopilot profiles', 'Standard base applications and security endpoint agents'],
@@ -292,7 +322,12 @@ function parseResume(resumeText) {
     'python', 'django', 'fastapi', 'java', 'spring', 'c++', 'c#', '.net', 'sql', 'postgresql',
     'mysql', 'mongodb', 'redis', 'graphql', 'rest', 'docker', 'kubernetes', 'aws', 'gcp',
     'azure', 'git', 'ci/cd', 'tailwind', 'redux', 'pandas', 'numpy', 'machine learning',
-    'data structures', 'algorithms', 'sqlite', 'html', 'css', 'linux', 'testing', 'jest'
+    'data structures', 'algorithms', 'sqlite', 'html', 'css', 'linux', 'testing', 'jest',
+    'terraform', 'ansible', 'jenkins', 'argocd', 'helm', 'prometheus', 'grafana',
+    'ec2', 's3', 'vpc', 'iam', 'cloudwatch', 'route53', 'lambda',
+    'bash', 'shell', 'systemd', 'lvm', 'selinux', 'iptables', 'nginx', 'apache',
+    'active directory', 'dns', 'dhcp', 'windows server', 'office 365', 'powershell',
+    'troubleshooting', 'networking', 'hardware', 'printers', 'vpn'
   ];
 
   const foundSkills = skillCatalog.filter(skill => text.includes(skill.toLowerCase()));
@@ -366,6 +401,7 @@ function getQuestionsForRole(roleKey, resumeAnalysis = null) {
     const topSkills = resumeAnalysis.skillsFound.slice(0, 3).join(' and ');
     questions.unshift({
       question: `Your resume highlights proficiency in ${topSkills}. Can you walk me through the most technically challenging project you built using these technologies, highlighting an architectural bottleneck you resolved?`,
+      hindi_question: `Aapke resume mein ${topSkills} ka mention hai. Kya aap in technologies par banaye kisi challenging project ke baare mein bata sakte hain jisme aapne koi technical ya architectural problem solve ki ho?`,
       category: 'Resume & Deep Dive',
       difficulty: 'Medium',
       expectedPoints: ['Clear problem statement', 'Architecture diagram/design', 'Technical hurdle/bottleneck', 'Measurable outcome and lessons learned'],

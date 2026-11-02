@@ -8,8 +8,11 @@ import {
   CheckCircle2, 
   Clock, 
   Award,
-  ChevronRight
+  ChevronRight,
+  TrendingUp,
+  RotateCcw
 } from 'lucide-react';
+import { playClickSound } from '../utils/soundEffects';
 
 export default function History({ onViewReport, onStartNew }) {
   const [interviews, setInterviews] = useState([]);
@@ -60,7 +63,10 @@ export default function History({ onViewReport, onStartNew }) {
         </div>
 
         <button
-          onClick={onStartNew}
+          onClick={() => {
+            playClickSound();
+            onStartNew();
+          }}
           className="btn-ai btn-ai-primary"
           style={{ padding: '10px 20px', fontSize: '0.85rem' }}
         >
@@ -82,7 +88,13 @@ export default function History({ onViewReport, onStartNew }) {
           <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', maxWidth: '420px', margin: '0 auto 20px' }}>
             Take your first AI mock interview round to unlock personalized scorecards and performance feedback.
           </p>
-          <button onClick={onStartNew} className="btn-ai btn-ai-primary">
+          <button 
+            onClick={() => {
+              playClickSound();
+              onStartNew();
+            }} 
+            className="btn-ai btn-ai-primary"
+          >
             Start Your First Mock Round
           </button>
         </div>
@@ -102,15 +114,19 @@ export default function History({ onViewReport, onStartNew }) {
                   justifyContent: 'space-between',
                   padding: '20px 24px',
                   cursor: 'pointer',
-                  border: '1px solid var(--border)'
+                  border: '1px solid var(--border)',
+                  transition: 'all 0.2s ease'
                 }}
-                onClick={() => onViewReport(item.id)}
+                onClick={() => {
+                  playClickSound();
+                  onViewReport(item.id);
+                }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                   {/* Score badge circle */}
                   <div style={{
-                    width: '54px',
-                    height: '54px',
+                    width: '56px',
+                    height: '56px',
                     borderRadius: '50%',
                     background: score >= 80 ? 'rgba(16, 185, 129, 0.15)' : (score >= 65 ? 'rgba(99, 102, 241, 0.15)' : 'rgba(245, 158, 11, 0.15)'),
                     border: `2px solid ${score >= 80 ? '#10b981' : (score >= 65 ? '#6366f1' : '#f59e0b')}`,
@@ -120,10 +136,10 @@ export default function History({ onViewReport, onStartNew }) {
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontWeight: 900,
-                    fontSize: '1.1rem',
+                    fontSize: '1.15rem',
                     flexShrink: 0
                   }}>
-                    <span>{score}</span>
+                    <span>{score}%</span>
                   </div>
 
                   <div>
@@ -154,21 +170,25 @@ export default function History({ onViewReport, onStartNew }) {
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  <div style={{ textAlign: 'right', fontSize: '0.75rem', color: '#64748b' }}>
-                    <div>{item.created_at ? new Date(item.created_at).toLocaleDateString() : 'Recent'}</div>
-                    <div style={{ color: 'var(--accent-cyan)', fontWeight: 600, marginTop: '2px' }}>
-                      Tech Score: {Math.round(item.technical_score || 85)}%
+                <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
+                  <div style={{ textAlign: 'right', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'flex-end' }}>
+                      <Calendar size={13} />
+                      <span>{new Date(item.created_at).toLocaleDateString()}</span>
                     </div>
                   </div>
-
-                  <button
-                    className="btn-ai btn-ai-secondary"
-                    style={{ padding: '8px 14px', fontSize: '0.8rem' }}
-                  >
-                    <span>View Scorecard</span>
-                    <ChevronRight size={14} />
-                  </button>
+                  <div style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'var(--text-muted)'
+                  }}>
+                    <ChevronRight size={18} />
+                  </div>
                 </div>
               </div>
             );

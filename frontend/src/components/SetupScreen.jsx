@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   Sparkles, 
   Briefcase, 
@@ -12,8 +12,21 @@ import {
   AlertCircle,
   Code2,
   Trash2,
-  FileUp
+  FileUp,
+  Layers,
+  Layout,
+  Server,
+  Cpu,
+  Cloud,
+  Terminal,
+  Headphones,
+  Monitor,
+  Flame,
+  Zap,
+  Check,
+  RefreshCw
 } from 'lucide-react';
+import { playClickSound, playSuccessSound } from '../utils/soundEffects';
 
 const SAMPLE_RESUMES = {
   fullstack: `AARAV SHARMA
@@ -168,46 +181,163 @@ EXPERIENCE & PROJECTS
 • Managed office network printer queues and resolved print spooler failures across 3 office floors.`
 };
 
+const ROLES_LIST = [
+  {
+    id: 'fullstack',
+    title: 'Full Stack Engineer',
+    roleVal: 'Full Stack Engineer (React & Node.js)',
+    icon: Layers,
+    badge: 'Trending',
+    badgeColor: '#6366f1',
+    desc: 'End-to-end full stack web architecture, React 19, RESTful APIs, Node.js & DBs.',
+    skills: ['React 19', 'Node.js', 'PostgreSQL', 'Docker', 'Redis']
+  },
+  {
+    id: 'devops',
+    title: 'DevOps & Cloud Ops',
+    roleVal: 'DevOps Engineer (Docker, K8s, CI/CD)',
+    icon: Cpu,
+    badge: 'High Demand',
+    badgeColor: '#06b6d4',
+    desc: 'Container orchestration, CI/CD pipeline automation, Terraform & Kubernetes.',
+    skills: ['Kubernetes', 'Docker', 'Terraform', 'CI/CD', 'Helm']
+  },
+  {
+    id: 'aws',
+    title: 'AWS Cloud Architect',
+    roleVal: 'AWS Cloud Engineer (AWS, Cloud Infrastructure)',
+    icon: Cloud,
+    badge: 'Cloud Native',
+    badgeColor: '#f59e0b',
+    desc: 'High availability multi-tier cloud infrastructure, VPC, EC2, S3, IAM & Lambda.',
+    skills: ['AWS VPC', 'EC2', 'S3', 'IAM', 'CloudWatch']
+  },
+  {
+    id: 'linux',
+    title: 'Linux Administrator',
+    roleVal: 'Linux Administrator (RHEL, Bash, systemd)',
+    icon: Terminal,
+    badge: 'SysAdmin',
+    badgeColor: '#10b981',
+    desc: 'Enterprise Linux servers, Bash automation, systemd, LVM, firewall & security.',
+    skills: ['RHEL / Ubuntu', 'Bash', 'systemd', 'LVM', 'SELinux']
+  },
+  {
+    id: 'frontend',
+    title: 'Frontend Specialist',
+    roleVal: 'Frontend Developer (React & Next.js)',
+    icon: Layout,
+    badge: 'UI / UX',
+    badgeColor: '#ec4899',
+    desc: 'Core Web Vitals, accessible React components, Next.js App Router & modern state.',
+    skills: ['React', 'Next.js', 'TypeScript', 'Tailwind', 'Performance']
+  },
+  {
+    id: 'backend',
+    title: 'Backend Architect',
+    roleVal: 'Backend Developer (Node.js & Microservices)',
+    icon: Server,
+    badge: 'Microservices',
+    badgeColor: '#8b5cf6',
+    desc: 'Distributed rate limiting, event-driven Kafka architectures, SQL optimization.',
+    skills: ['Node.js', 'Microservices', 'PostgreSQL', 'Redis', 'Kafka']
+  },
+  {
+    id: 'itsupport',
+    title: 'IT Support Specialist',
+    roleVal: 'IT Support Specialist (Active Directory, Network)',
+    icon: Headphones,
+    badge: 'Enterprise',
+    badgeColor: '#3b82f6',
+    desc: 'Active Directory, Windows Server, TCP/IP, Office 365, DNS & enterprise helpdesk.',
+    skills: ['Active Directory', 'DNS / DHCP', 'Office 365', 'Networking']
+  },
+  {
+    id: 'desktopsupport',
+    title: 'Desktop Support',
+    roleVal: 'Desktop Support Engineer (Hardware, Windows, Helpdesk)',
+    icon: Monitor,
+    badge: 'Hardware & OS',
+    badgeColor: '#14b8a6',
+    desc: 'BSOD diagnostics, laptop imaging, peripheral repair, RAM/SSD hardware upgrades.',
+    skills: ['Windows 11', 'BSOD Analysis', 'Hardware Repair', 'Sysprep']
+  }
+];
+
+const EXPERIENCE_OPTIONS = [
+  '0-1 Years (Fresher / Junior)',
+  '1-3 Years Experience',
+  '3-5+ Years (Mid / Senior)'
+];
+
+const COMPANY_OPTIONS = [
+  'Product Startup (High Velocity)',
+  'Top Tech MAANG (High Rigor)',
+  'Enterprise MNC (Scale & Security)',
+  'Remote Global Team'
+];
+
 export default function SetupScreen({ onStartInterview }) {
+  const [selectedRoleId, setSelectedRoleId] = useState('fullstack');
   const [candidateName, setCandidateName] = useState('Aarav Sharma');
-  const [role, setRole] = useState('Full Stack Engineer (React & Node.js)');
   const [experience, setExperience] = useState('1-3 Years Experience');
   const [companyType, setCompanyType] = useState('Product Startup (High Velocity)');
+  const [voiceLanguage, setVoiceLanguage] = useState('en-IN');
   const [resumeText, setResumeText] = useState(SAMPLE_RESUMES.fullstack);
   const [analyzing, setAnalyzing] = useState(false);
   const [uploadingFile, setUploadingFile] = useState(false);
   const [uploadedFileName, setUploadedFileName] = useState('');
+  const [isDragOver, setIsDragOver] = useState(false);
   const [resumeAnalysis, setResumeAnalysis] = useState(null);
+  
   const fileInputRef = useRef(null);
 
-  const handleRoleChange = (e) => {
-    const selectedRole = e.target.value;
-    setRole(selectedRole);
+  // Auto scan on initial load
+  useEffect(() => {
+    triggerAutoScan(SAMPLE_RESUMES.fullstack);
+  }, []);
+
+  const selectedRoleObj = ROLES_LIST.find(r => r.id === selectedRoleId) || ROLES_LIST[0];
+
+  const handleRoleSelect = (roleItem) => {
+    playClickSound();
+    setSelectedRoleId(roleItem.id);
+    
+    // Auto-update sample resume if no custom file uploaded
     if (!uploadedFileName) {
-      if (selectedRole.includes('AWS')) {
-        setResumeText(SAMPLE_RESUMES.aws);
-      } else if (selectedRole.includes('DevOps')) {
-        setResumeText(SAMPLE_RESUMES.devops);
-      } else if (selectedRole.includes('Linux')) {
-        setResumeText(SAMPLE_RESUMES.linux);
-      } else if (selectedRole.includes('IT Support')) {
-        setResumeText(SAMPLE_RESUMES.itsupport);
-      } else if (selectedRole.includes('Desktop Support')) {
-        setResumeText(SAMPLE_RESUMES.desktopsupport);
-      } else if (selectedRole.includes('Front')) {
-        setResumeText(SAMPLE_RESUMES.frontend);
-      } else if (selectedRole.includes('Back')) {
-        setResumeText(SAMPLE_RESUMES.backend);
-      } else {
-        setResumeText(SAMPLE_RESUMES.fullstack);
-      }
+      const sample = SAMPLE_RESUMES[roleItem.id] || SAMPLE_RESUMES.fullstack;
+      setResumeText(sample);
+      triggerAutoScan(sample);
     }
   };
 
-  const handleFileSelect = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
 
+  const handleDragLeave = () => {
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    const files = e.dataTransfer.files;
+    if (files && files[0]) {
+      processUploadedFile(files[0]);
+    }
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      processUploadedFile(file);
+    }
+  };
+
+  const processUploadedFile = async (file) => {
+    playClickSound();
     setUploadingFile(true);
     setUploadedFileName(file.name);
 
@@ -222,16 +352,17 @@ export default function SetupScreen({ onStartInterview }) {
         });
         const data = await res.json();
         if (data.success) {
+          playSuccessSound();
           setResumeText(data.extractedText);
           setResumeAnalysis(data.analysis);
         } else {
           alert(data.message || 'Error parsing PDF document');
         }
       } else {
-        // Text or Markdown
         const reader = new FileReader();
         reader.onload = (event) => {
           const text = event.target.result;
+          playSuccessSound();
           setResumeText(text);
           triggerAutoScan(text);
         };
@@ -239,13 +370,14 @@ export default function SetupScreen({ onStartInterview }) {
       }
     } catch (err) {
       console.error('File upload error:', err);
-      alert('Unable to read resume file. You can also paste text directly.');
+      alert('Unable to parse file. You can also paste resume text directly.');
     } finally {
       setUploadingFile(false);
     }
   };
 
   const triggerAutoScan = async (text) => {
+    if (!text || text.trim().length === 0) return;
     setAnalyzing(true);
     try {
       const res = await fetch('/api/resume/analyze', {
@@ -253,7 +385,7 @@ export default function SetupScreen({ onStartInterview }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           candidate_name: candidateName,
-          target_role: role,
+          target_role: selectedRoleObj.roleVal,
           resume_text: text
         })
       });
@@ -262,89 +394,173 @@ export default function SetupScreen({ onStartInterview }) {
         setResumeAnalysis(data.analysis);
       }
     } catch (err) {
-      console.error(err);
+      console.error('Scan error:', err);
     } finally {
       setAnalyzing(false);
     }
   };
 
   const handleClearResume = () => {
+    playClickSound();
     setResumeText('');
     setUploadedFileName('');
     setResumeAnalysis(null);
   };
 
-  const handleAnalyzeResume = async () => {
-    setAnalyzing(true);
-    try {
-      const res = await fetch('/api/resume/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          candidate_name: candidateName,
-          target_role: role,
-          resume_text: resumeText
-        })
-      });
-      const data = await res.json();
-      if (data.success) {
-        setResumeAnalysis(data.analysis);
-      }
-    } catch (err) {
-      console.error('Failed to analyze resume:', err);
-    } finally {
-      setAnalyzing(false);
-    }
+  const handleResetToSample = () => {
+    playClickSound();
+    const sample = SAMPLE_RESUMES[selectedRoleId] || SAMPLE_RESUMES.fullstack;
+    setResumeText(sample);
+    setUploadedFileName('');
+    triggerAutoScan(sample);
   };
 
   const handleLaunch = () => {
+    playSuccessSound();
     onStartInterview({
-      candidateName,
-      role,
+      candidateName: candidateName.trim() || 'Alex Kumar',
+      role: selectedRoleObj.roleVal,
       experience,
       companyType,
+      voiceLanguage,
       resumeText,
       resumeAnalysis
     });
   };
 
+  // Radial calculation for ATS score
+  const atsScore = resumeAnalysis?.atsScore || 75;
+  const radius = 42;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (atsScore / 100) * circumference;
+
+  const getScoreColor = (score) => {
+    if (score >= 80) return '#10b981';
+    if (score >= 65) return '#f59e0b';
+    return '#f43f5e';
+  };
+  const scoreColor = getScoreColor(atsScore);
+
   return (
     <div className="setup-container">
-      {/* Hero Intro */}
-      <div style={{ textAlign: 'center', marginBottom: '36px' }}>
+      {/* Hero Intro Header */}
+      <div style={{ textAlign: 'center', marginBottom: '38px' }}>
         <div style={{
           display: 'inline-flex',
           alignItems: 'center',
           gap: '8px',
-          padding: '6px 14px',
+          padding: '6px 16px',
           borderRadius: 'var(--radius-full)',
           background: 'rgba(99, 102, 241, 0.12)',
           border: '1px solid rgba(99, 102, 241, 0.3)',
           color: '#818cf8',
           fontSize: '0.8rem',
           fontWeight: 700,
-          marginBottom: '14px'
+          marginBottom: '16px'
         }}>
           <Sparkles size={15} />
-          <span>AI-POWERED TECHNICAL & HR INTERVIEWS</span>
+          <span>AI-POWERED TECHNICAL & HR MOCK INTERVIEWS</span>
         </div>
-        <h1 className="hero-title">Prepare with Real-Time AI Video & Voice Interviewer</h1>
+        <h1 className="hero-title">Practice Interviews with Interactive AI Voice & Video</h1>
         <p className="hero-subtitle" style={{ margin: '0 auto' }}>
-          Select your target role, paste your resume, and let our interactive AI conduct a live technical round with real-time speech, webcam view, and in-depth scorecard feedback.
+          Select your target role, upload your PDF resume, and let our interactive AI interviewer ask real-time technical questions with live speech, webcam proctoring, and instant feedback.
         </p>
       </div>
 
-      {/* Main Grid: Settings & Resume */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '28px', alignItems: 'start' }}>
-        {/* Left Column: Interview Settings */}
+      {/* STEP 1: Interactive Role Selector Cards */}
+      <div className="glass-card" style={{ marginBottom: '28px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+          <h2 style={{ fontSize: '1.2rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Briefcase size={22} color="var(--primary)" />
+            Step 1: Choose Your Target Job Role
+          </h2>
+          <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+            8 Specialized Domains Configured
+          </span>
+        </div>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginBottom: '16px' }}>
+          Click a role to load domain-specific interview questions, technical benchmarks, and sample resumes.
+        </p>
+
+        <div className="roles-grid">
+          {ROLES_LIST.map((r) => {
+            const isSelected = r.id === selectedRoleId;
+            const Icon = r.icon;
+            return (
+              <div 
+                key={r.id} 
+                className={`role-card ${isSelected ? 'selected' : ''}`}
+                onClick={() => handleRoleSelect(r)}
+              >
+                <div className="role-card-header">
+                  <div className="role-icon-box">
+                    <Icon size={22} />
+                  </div>
+                  <span 
+                    className="role-badge"
+                    style={{
+                      background: `${r.badgeColor}20`,
+                      color: r.badgeColor,
+                      border: `1px solid ${r.badgeColor}50`
+                    }}
+                  >
+                    {r.badge}
+                  </span>
+                </div>
+
+                <div>
+                  <div className="role-card-title">{r.title}</div>
+                  <div className="role-card-desc">{r.desc}</div>
+                </div>
+
+                <div className="role-skills-pills">
+                  {r.skills.map((skill, sIdx) => (
+                    <span key={sIdx} className="role-skill-pill">
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+
+                {isSelected && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '10px',
+                    right: '10px',
+                    width: '18px',
+                    height: '18px',
+                    borderRadius: '50%',
+                    background: 'var(--primary)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#fff',
+                    boxShadow: '0 0 10px var(--primary)'
+                  }}>
+                    <Check size={12} strokeWidth={3} />
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* STEP 2: Candidate Details & Interview Preferences */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.3fr', gap: '28px', alignItems: 'start' }}>
+        
+        {/* Left Column: Candidate & Preferences */}
         <div className="glass-card">
           <h2 style={{ fontSize: '1.15rem', fontWeight: 800, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Briefcase size={20} color="var(--primary)" />
-            Interview Target Configuration
+            <GraduationCap size={20} color="var(--accent-cyan)" />
+            Step 2: Candidate & Session Details
           </h2>
 
+          {/* Candidate Name */}
           <div className="input-group">
-            <label className="input-label">Candidate Name</label>
+            <label className="input-label">
+              <span>Candidate Name</span>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Shown on Scorecard</span>
+            </label>
             <input 
               type="text" 
               className="text-input" 
@@ -354,282 +570,342 @@ export default function SetupScreen({ onStartInterview }) {
             />
           </div>
 
+          {/* Experience Level Pills */}
           <div className="input-group">
-            <label className="input-label">Target Role</label>
-            <select 
-              className="select-input"
-              value={role}
-              onChange={handleRoleChange}
-            >
-              <optgroup label="Cloud & Infrastructure">
-                <option value="AWS Cloud Engineer (Solutions Architect & Infrastructure)">AWS Cloud Engineer (VPC, EC2, IAM, S3 & Cloud Architecture)</option>
-                <option value="DevOps Engineer (CI/CD, Docker & Kubernetes)">DevOps Engineer (CI/CD, Docker, Kubernetes & Terraform)</option>
-                <option value="Linux System Administrator (RHEL, Ubuntu & Bash)">Linux System Administrator (RHEL, Ubuntu, systemd & Networking)</option>
-              </optgroup>
-              <optgroup label="IT & Technical Support">
-                <option value="IT Support Specialist (Active Directory & Network Troubleshooting)">IT Support Specialist (Active Directory, DNS, VPN & Office 365)</option>
-                <option value="Desktop Support Engineer (Hardware, OS & Diagnostics)">Desktop Support Engineer (Hardware, BSOD, Printers & Endpoint Support)</option>
-              </optgroup>
-              <optgroup label="Software Engineering & Data">
-                <option value="Full Stack Engineer (React & Node.js)">Full Stack Engineer (React & Node.js)</option>
-                <option value="Frontend Developer (React & TypeScript)">Frontend Developer (React & TypeScript)</option>
-                <option value="Backend Developer (Node.js & Python)">Backend Developer (Node.js & Distributed Systems)</option>
-                <option value="Data Analyst / Data Scientist">Data Analyst / Data Scientist</option>
-              </optgroup>
-            </select>
-          </div>
-
-          <div className="input-group">
-            <label className="input-label">Experience Bracket</label>
-            <select 
-              className="select-input"
-              value={experience}
-              onChange={(e) => setExperience(e.target.value)}
-            >
-              <option value="Fresher / College Graduate (0-1 Year)">Fresher / College Graduate (0-1 Year)</option>
-              <option value="1-3 Years Experience (Junior-Mid)">1-3 Years Experience (Junior-Mid)</option>
-              <option value="3-5 Years Experience (Senior)">3-5 Years Experience (Senior)</option>
-            </select>
-          </div>
-
-          <div className="input-group">
-            <label className="input-label">Target Company Culture</label>
-            <select 
-              className="select-input"
-              value={companyType}
-              onChange={(e) => setCompanyType(e.target.value)}
-            >
-              <option value="Product Startup (High Velocity)">Product Startup (High Velocity, Problem Solving)</option>
-              <option value="Tier-1 Big Tech / FAANG">Tier-1 Big Tech / FAANG (In-depth Algorithms & Scalability)</option>
-              <option value="Enterprise / Global Consultancy">Enterprise / Global Consultancy (Robust Architecture & Clean Code)</option>
-            </select>
-          </div>
-
-          <div style={{
-            background: 'rgba(99, 102, 241, 0.08)',
-            border: '1px solid rgba(99, 102, 241, 0.2)',
-            borderRadius: 'var(--radius-md)',
-            padding: '14px 16px',
-            fontSize: '0.8rem',
-            color: '#c7d2fe',
-            display: 'flex',
-            gap: '10px'
-          }}>
-            <Code2 size={20} color="var(--primary)" style={{ flexShrink: 0 }} />
-            <div>
-              <strong>Adaptive Questioning:</strong> The AI will analyze your specific resume projects and generate 4 targeted technical and design questions tailored to your background.
+            <label className="input-label">Experience Level</label>
+            <div className="pills-group">
+              {EXPERIENCE_OPTIONS.map((exp, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  className={`pill-option ${experience === exp ? 'active' : ''}`}
+                  onClick={() => {
+                    playClickSound();
+                    setExperience(exp);
+                  }}
+                >
+                  {exp}
+                </button>
+              ))}
             </div>
           </div>
+
+          {/* Company Target Pills */}
+          <div className="input-group">
+            <label className="input-label">Target Company Culture</label>
+            <div className="pills-group">
+              {COMPANY_OPTIONS.map((comp, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  className={`pill-option ${companyType === comp ? 'active' : ''}`}
+                  onClick={() => {
+                    playClickSound();
+                    setCompanyType(comp);
+                  }}
+                >
+                  {comp}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Voice Assistant & Language Selection */}
+          <div className="input-group">
+            <label className="input-label">
+              <span>AI Voice Assistant & Accent</span>
+              <span style={{ fontSize: '0.75rem', color: '#38bdf8', fontWeight: 600 }}>🇮🇳 Hindi / Indian English</span>
+            </label>
+            <div className="pills-group">
+              <button
+                type="button"
+                className={`pill-option ${voiceLanguage === 'en-IN' ? 'active' : ''}`}
+                onClick={() => {
+                  playClickSound();
+                  setVoiceLanguage('en-IN');
+                }}
+              >
+                🇮🇳 Indian English (en-IN)
+              </button>
+              <button
+                type="button"
+                className={`pill-option ${voiceLanguage === 'hi-IN' ? 'active' : ''}`}
+                onClick={() => {
+                  playClickSound();
+                  setVoiceLanguage('hi-IN');
+                }}
+              >
+                🇮🇳 हिंदी Voice Assistant (hi-IN)
+              </button>
+              <button
+                type="button"
+                className={`pill-option ${voiceLanguage === 'en-US' ? 'active' : ''}`}
+                onClick={() => {
+                  playClickSound();
+                  setVoiceLanguage('en-US');
+                }}
+              >
+                🌐 Global English (en-US)
+              </button>
+            </div>
+            <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', marginTop: '8px', lineHeight: '1.4' }}>
+              {voiceLanguage === 'hi-IN' 
+                ? '⭐ AI questions Hindi/Hinglish me bolega aur speech-to-text Hindi voice transcription sunega.' 
+                : voiceLanguage === 'en-IN'
+                ? '⭐ AI Indian English accent (Ravi / Heera / Google Indian English) me bolega aur Indian accent speech sunega.'
+                : '⭐ Standard Global English pronunciation aur voice recognition.'}
+            </div>
+          </div>
+
+          {/* Live Feature Highlights */}
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.03)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-md)',
+            padding: '16px',
+            marginTop: '20px'
+          }}>
+            <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px' }}>
+              ⚡ Interactive Interview Engine Active
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '0.82rem', color: '#cbd5e1' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <CheckCircle2 size={15} color="#10b981" />
+                <span>Real-Time Voice AI (TTS)</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <CheckCircle2 size={15} color="#10b981" />
+                <span>Webcam Video Proctor</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <CheckCircle2 size={15} color="#10b981" />
+                <span>Speech-to-Text Answer</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <CheckCircle2 size={15} color="#10b981" />
+                <span>Instant Answer Scoring</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Big Launch Button */}
+          <button 
+            onClick={handleLaunch}
+            className="btn-ai btn-ai-primary"
+            style={{ width: '100%', marginTop: '24px', padding: '16px 24px', fontSize: '1.05rem' }}
+          >
+            <span>Launch Live AI Interview</span>
+            <ArrowRight size={20} />
+          </button>
         </div>
 
-        {/* Right Column: Resume Input & ATS Analysis */}
+        {/* Right Column: Resume Upload & Interactive ATS Analyzer */}
         <div className="glass-card">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
+            <h2 style={{ fontSize: '1.15rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <FileText size={20} color="var(--accent-emerald)" />
+              Step 3: Resume & ATS Diagnostics
+            </h2>
+
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button 
+                onClick={handleResetToSample}
+                className="btn-ai btn-ai-secondary"
+                style={{ padding: '6px 12px', fontSize: '0.78rem' }}
+                title="Reset to selected role sample"
+              >
+                <RefreshCw size={13} />
+                <span>Sample</span>
+              </button>
+              <button 
+                onClick={handleClearResume}
+                className="btn-ai btn-ai-secondary"
+                style={{ padding: '6px 12px', fontSize: '0.78rem' }}
+                title="Clear text"
+              >
+                <Trash2 size={13} />
+                <span>Clear</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Drag & Drop Upload Zone */}
           <input 
             type="file" 
             ref={fileInputRef} 
-            onChange={handleFileSelect} 
+            onChange={handleFileChange}
             accept=".pdf,.txt,.md" 
             style={{ display: 'none' }} 
           />
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
-            <h2 style={{ fontSize: '1.15rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <FileText size={20} color="var(--accent-cyan)" />
-              Candidate Resume
-            </h2>
-
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploadingFile}
-                className="btn-ai btn-ai-primary"
-                style={{ padding: '6px 14px', fontSize: '0.8rem', background: 'linear-gradient(135deg, #06b6d4, #0891b2)' }}
-              >
-                <FileUp size={14} />
-                <span>{uploadingFile ? 'Extracting PDF...' : 'Upload PDF / Text'}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={handleAnalyzeResume}
-                disabled={analyzing}
-                className="btn-ai btn-ai-secondary"
-                style={{ padding: '6px 14px', fontSize: '0.8rem' }}
-              >
-                <Sparkles size={14} color="var(--accent-cyan)" />
-                <span>{analyzing ? 'Scanning...' : 'Scan ATS'}</span>
-              </button>
+          <div 
+            className={`resume-dropzone ${isDragOver ? 'dragover' : ''}`}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <UploadCloud size={38} color={uploadingFile ? '#06b6d4' : '#6366f1'} style={{ margin: '0 auto 8px' }} />
+            <div style={{ fontWeight: 700, fontSize: '0.98rem', color: '#fff' }}>
+              {uploadingFile ? 'AI is parsing your PDF document...' : 'Click or Drag & Drop your Resume (PDF / TXT)'}
             </div>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginTop: '4px' }}>
+              Supports modern PDF files, TXT, and Markdown up to 10MB
+            </p>
+
+            {uploadedFileName && (
+              <div style={{
+                marginTop: '12px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '4px 14px',
+                borderRadius: 'var(--radius-full)',
+                background: 'rgba(16, 185, 129, 0.15)',
+                border: '1px solid rgba(16, 185, 129, 0.4)',
+                color: '#34d399',
+                fontSize: '0.8rem',
+                fontWeight: 600
+              }}>
+                <FileCheck size={14} />
+                <span>{uploadedFileName} (Uploaded & Verified)</span>
+              </div>
+            )}
           </div>
 
-          {uploadedFileName && (
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              background: 'rgba(6, 182, 212, 0.1)',
-              border: '1px solid rgba(6, 182, 212, 0.3)',
-              borderRadius: 'var(--radius-sm)',
-              padding: '6px 12px',
-              fontSize: '0.78rem',
-              color: '#67e8f9',
-              marginBottom: '10px'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <CheckCircle2 size={14} color="#06b6d4" />
-                <span>Uploaded: <strong>{uploadedFileName}</strong> (Text Extracted)</span>
-              </div>
+          {/* Resume Text Area with live count */}
+          <div style={{ marginTop: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+              <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-muted)' }}>
+                Extracted Resume Content ({resumeText ? resumeText.split(/\s+/).filter(Boolean).length : 0} words)
+              </span>
               <button
                 type="button"
-                onClick={handleClearResume}
-                style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '0.72rem' }}
+                onClick={() => triggerAutoScan(resumeText)}
+                className="btn-ai btn-ai-secondary"
+                style={{ padding: '4px 10px', fontSize: '0.74rem' }}
+                disabled={analyzing}
               >
-                Remove
+                {analyzing ? 'Scanning...' : 'Re-Run ATS Scan'}
               </button>
-            </div>
-          )}
-
-          <div className="input-group" style={{ marginBottom: '14px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-              <label className="input-label" style={{ margin: 0 }}>
-                {uploadedFileName ? 'Extracted Resume Content' : 'Paste Your Resume or Edit Below'}
-              </label>
-              {resumeText && (
-                <button
-                  type="button"
-                  onClick={handleClearResume}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#94a3b8',
-                    cursor: 'pointer',
-                    fontSize: '0.72rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px'
-                  }}
-                >
-                  <Trash2 size={12} />
-                  <span>Clear</span>
-                </button>
-              )}
             </div>
             <textarea
               className="text-input"
-              style={{ height: '220px', fontFamily: "'JetBrains Mono', monospace", fontSize: '0.8rem' }}
+              rows={6}
+              style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.82rem', resize: 'vertical' }}
               value={resumeText}
-              onChange={(e) => setResumeText(e.target.value)}
-              placeholder="Paste your own resume content here (Skills, Experience, Education, Projects)..."
+              onChange={(e) => {
+                setResumeText(e.target.value);
+              }}
+              placeholder="Paste your plain text resume or upload a PDF above..."
             />
           </div>
 
-          {/* Quick preset buttons */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '18px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Load Role Template:</span>
-            <button
-              type="button"
-              onClick={() => { setResumeText(SAMPLE_RESUMES.aws); setRole('AWS Cloud Engineer (Solutions Architect & Infrastructure)'); setUploadedFileName(''); }}
-              style={{ background: 'rgba(255,255,255,0.06)', border: 'none', color: '#38bdf8', padding: '4px 8px', borderRadius: '4px', fontSize: '0.72rem', cursor: 'pointer', fontWeight: 600 }}
-            >
-              ☁️ AWS Cloud
-            </button>
-            <button
-              type="button"
-              onClick={() => { setResumeText(SAMPLE_RESUMES.devops); setRole('DevOps Engineer (CI/CD, Docker & Kubernetes)'); setUploadedFileName(''); }}
-              style={{ background: 'rgba(255,255,255,0.06)', border: 'none', color: '#a78bfa', padding: '4px 8px', borderRadius: '4px', fontSize: '0.72rem', cursor: 'pointer', fontWeight: 600 }}
-            >
-              ⚡ DevOps
-            </button>
-            <button
-              type="button"
-              onClick={() => { setResumeText(SAMPLE_RESUMES.linux); setRole('Linux System Administrator (RHEL, Ubuntu & Bash)'); setUploadedFileName(''); }}
-              style={{ background: 'rgba(255,255,255,0.06)', border: 'none', color: '#fbbf24', padding: '4px 8px', borderRadius: '4px', fontSize: '0.72rem', cursor: 'pointer', fontWeight: 600 }}
-            >
-              🐧 Linux Admin
-            </button>
-            <button
-              type="button"
-              onClick={() => { setResumeText(SAMPLE_RESUMES.itsupport); setRole('IT Support Specialist (Active Directory & Network Troubleshooting)'); setUploadedFileName(''); }}
-              style={{ background: 'rgba(255,255,255,0.06)', border: 'none', color: '#34d399', padding: '4px 8px', borderRadius: '4px', fontSize: '0.72rem', cursor: 'pointer', fontWeight: 600 }}
-            >
-              🎫 IT Support
-            </button>
-            <button
-              type="button"
-              onClick={() => { setResumeText(SAMPLE_RESUMES.desktopsupport); setRole('Desktop Support Engineer (Hardware, OS & Diagnostics)'); setUploadedFileName(''); }}
-              style={{ background: 'rgba(255,255,255,0.06)', border: 'none', color: '#f472b6', padding: '4px 8px', borderRadius: '4px', fontSize: '0.72rem', cursor: 'pointer', fontWeight: 600 }}
-            >
-              💻 Desktop Support
-            </button>
-            <button
-              type="button"
-              onClick={() => { setResumeText(SAMPLE_RESUMES.fullstack); setRole('Full Stack Engineer (React & Node.js)'); setUploadedFileName(''); }}
-              style={{ background: 'rgba(255,255,255,0.06)', border: 'none', color: '#cbd5e1', padding: '4px 8px', borderRadius: '4px', fontSize: '0.72rem', cursor: 'pointer' }}
-            >
-              Full Stack
-            </button>
-          </div>
-
-          {/* Real-time ATS Preview if Analyzed */}
+          {/* Interactive ATS Score Meter & Skill Badges */}
           {resumeAnalysis && (
             <div style={{
-              background: 'rgba(15, 23, 42, 0.9)',
-              border: '1px solid rgba(6, 182, 212, 0.3)',
-              borderRadius: 'var(--radius-md)',
-              padding: '16px',
-              marginBottom: '20px'
+              marginTop: '18px',
+              padding: '18px',
+              borderRadius: 'var(--radius-lg)',
+              background: 'rgba(15, 23, 42, 0.8)',
+              border: '1px solid var(--border)'
             }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--accent-cyan)' }}>
-                  ATS KEYWORD ANALYSIS
-                </span>
-                <span style={{
-                  background: 'rgba(16, 185, 129, 0.15)',
-                  color: 'var(--accent-emerald)',
-                  padding: '2px 8px',
-                  borderRadius: '4px',
-                  fontSize: '0.75rem',
-                  fontWeight: 800
-                }}>
-                  ATS Match: {resumeAnalysis.atsScore}%
-                </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '22px' }}>
+                {/* Circular Gauge */}
+                <div className="ats-gauge-circle">
+                  <svg width="100" height="100">
+                    <circle 
+                      cx="50" 
+                      cy="50" 
+                      r={radius} 
+                      stroke="rgba(255, 255, 255, 0.1)" 
+                      strokeWidth="8" 
+                      fill="transparent" 
+                    />
+                    <circle 
+                      cx="50" 
+                      cy="50" 
+                      r={radius} 
+                      stroke={scoreColor} 
+                      strokeWidth="8" 
+                      fill="transparent" 
+                      strokeDasharray={circumference}
+                      strokeDashoffset={strokeDashoffset}
+                      strokeLinecap="round"
+                      style={{ transition: 'stroke-dashoffset 0.8s ease' }}
+                    />
+                  </svg>
+                  <div className="ats-score-number">
+                    <div className="ats-score-val" style={{ color: scoreColor }}>
+                      {atsScore}
+                    </div>
+                    <div className="ats-score-lbl">ATS Match</div>
+                  </div>
+                </div>
+
+                {/* Score Summary */}
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                    <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#fff' }}>
+                      {atsScore >= 80 ? 'ATS Optimized (High Pass)' : atsScore >= 65 ? 'Competitive Profile' : 'Needs Optimization'}
+                    </span>
+                    <span style={{
+                      padding: '2px 8px',
+                      borderRadius: 'var(--radius-full)',
+                      fontSize: '0.72rem',
+                      fontWeight: 700,
+                      background: `${scoreColor}20`,
+                      color: scoreColor,
+                      border: `1px solid ${scoreColor}50`
+                    }}>
+                      {selectedRoleObj.title}
+                    </span>
+                  </div>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem', lineHeight: '1.4' }}>
+                    {resumeAnalysis.strengths?.[0] || 'Technical keywords detected align with target position.'}
+                  </p>
+                </div>
               </div>
 
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '12px' }}>
-                {resumeAnalysis.skillsFound.map((skill, i) => (
-                  <span key={i} style={{
-                    background: 'rgba(99, 102, 241, 0.18)',
-                    color: '#c7d2fe',
-                    padding: '2px 8px',
-                    borderRadius: '4px',
-                    fontSize: '0.72rem',
-                    fontWeight: 700
-                  }}>
-                    {skill}
-                  </span>
-                ))}
+              {/* Detected Skills Chips */}
+              <div style={{ marginTop: '14px' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
+                  Detected Core Skills ({resumeAnalysis.skillsFound?.length || 0})
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                  {resumeAnalysis.skillsFound?.map((sk, idx) => (
+                    <span 
+                      key={idx}
+                      style={{
+                        fontSize: '0.74rem',
+                        fontWeight: 600,
+                        padding: '3px 10px',
+                        borderRadius: 'var(--radius-full)',
+                        background: 'rgba(99, 102, 241, 0.15)',
+                        border: '1px solid rgba(99, 102, 241, 0.35)',
+                        color: '#c7d2fe'
+                      }}
+                    >
+                      ✓ {sk}
+                    </span>
+                  ))}
+                </div>
               </div>
 
-              {resumeAnalysis.suggestions.length > 0 && (
-                <div style={{ fontSize: '0.74rem', color: '#f59e0b', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <AlertCircle size={14} />
-                  <span>Tip: {resumeAnalysis.suggestions[0]}</span>
+              {/* Suggestions */}
+              {resumeAnalysis.suggestions && resumeAnalysis.suggestions.length > 0 && (
+                <div style={{ marginTop: '14px', paddingTop: '12px', borderTop: '1px solid var(--border)' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#fbbf24', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+                    <Zap size={14} />
+                    <span>AI Recommendation for Interview Prep:</span>
+                  </div>
+                  <p style={{ fontSize: '0.8rem', color: '#cbd5e1', lineHeight: '1.45', margin: 0 }}>
+                    {resumeAnalysis.suggestions[0]}
+                  </p>
                 </div>
               )}
             </div>
           )}
-
-          {/* Launch Button */}
-          <button
-            type="button"
-            className="btn-ai btn-ai-primary"
-            style={{ width: '100%', padding: '14px', fontSize: '1rem' }}
-            onClick={handleLaunch}
-          >
-            <span>Enter AI Interview Room</span>
-            <ArrowRight size={18} />
-          </button>
         </div>
       </div>
     </div>

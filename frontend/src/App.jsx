@@ -39,6 +39,7 @@ export default function App() {
       });
       const data = await res.json();
       if (data.success) {
+        data.voiceLanguage = config.voiceLanguage || 'en-IN';
         setActiveInterviewData(data);
         setCurrentView('interview');
       } else {

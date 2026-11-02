@@ -58,3 +58,30 @@ npm start
 Then open your browser at: **[http://localhost:5050](http://localhost:5050)**
 
 Or run `start.bat` on Windows.
+
+---
+
+## ☁️ AWS EC2 Deployment Guide (1-Click & Docker)
+
+### Option 1: 1-Click Automated Script (Recommended)
+Connect to your Ubuntu 22.04 / 24.04 EC2 instance and run:
+```bash
+git clone <your-github-repo-url>
+cd ai-interview-platform
+chmod +x deploy-ec2.sh
+./deploy-ec2.sh
+```
+This script automatically:
+- Installs Node.js 20, Git, Nginx, and PM2
+- Builds the React 19 frontend
+- Configures Nginx reverse proxy (Port 80 -> Port 5050)
+- Runs the backend with PM2 daemon & enables systemd reboot startup
+
+### Option 2: Docker Compose
+```bash
+git clone <your-github-repo-url>
+cd ai-interview-platform
+sudo docker compose up -d --build
+```
+Access directly via: `http://<EC2-PUBLIC-IP>`
+
