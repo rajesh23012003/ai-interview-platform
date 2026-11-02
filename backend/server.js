@@ -270,7 +270,7 @@ app.post('/api/interview/finish', (req, res) => {
     }
 
     // Calculate score aggregates
-    const scores = questions.map(q => q.score || 50);
+    const scores = questions.map(q => (typeof q.score === 'number' ? q.score : 0));
     const avgScore = Math.round((scores.reduce((a, b) => a + b, 0) / scores.length) * 10) / 10;
 
     const technicalScore = Math.min(100, Math.round(avgScore + (Math.random() * 4 - 2)));

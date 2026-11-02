@@ -23,7 +23,8 @@ import {
   Flame,
   ArrowRight,
   Globe,
-  Languages
+  Languages,
+  SkipForward
 } from 'lucide-react';
 import { playClickSound, playSuccessSound } from '../utils/soundEffects';
 
@@ -40,6 +41,8 @@ export default function InterviewRoom({ interviewData, onFinishInterview, onExit
   const [showHint, setShowHint] = useState(false);
   const [showHindi, setShowHindi] = useState(true);
   const [voiceLanguage, setVoiceLanguage] = useState(interviewData.voiceLanguage || 'en-IN');
+  const [skippedQuestionIds, setSkippedQuestionIds] = useState(new Set());
+  const [showSkipModal, setShowSkipModal] = useState(false);
 
   const videoRef = useRef(null);
   const recognitionRef = useRef(null);
@@ -260,6 +263,54 @@ export default function InterviewRoom({ interviewData, onFinishInterview, onExit
     }
   };
 
+  // Skip question implementation
+  const handleConfirmSkip = async () => {
+    setShowSkipModal(false);
+    playClickSound();
+
+    if (isRecording && recognitionRef.current) {
+      recognitionRef.current.stop();
+      setIsRecording(false);
+    }
+    stopSpeaking();
+
+    setSkippedQuestionIds(prev => new Set(prev).add(currentQuestion.id));
+    setEvaluating(true);
+
+    try {
+      await fetch('/api/interview/submit-answer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          interviewId: interviewData.interviewId,
+          questionId: currentQuestion.id,
+          userAnswer: '[Skipped by candidate]'
+        })
+      });
+
+      setUserAnswer('');
+
+      if (currentQuestionIndex + 1 < questions.length) {
+        setCurrentQuestionIndex(prev => prev + 1);
+      } else {
+        // Last question skipped -> finish interview
+        const finishRes = await fetch('/api/interview/finish', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ interviewId: interviewData.interviewId })
+        });
+        const finishData = await finishRes.json();
+        if (finishData.success) {
+          onFinishInterview(finishData);
+        }
+      }
+    } catch (err) {
+      console.error('Error skipping question:', err);
+    } finally {
+      setEvaluating(false);
+    }
+  };
+
   const handleNextQuestion = async () => {
     playClickSound();
     setLastFeedback(null);
@@ -373,12 +424,23 @@ export default function InterviewRoom({ interviewData, onFinishInterview, onExit
             {questions.map((q, idx) => {
               const isDone = idx < currentQuestionIndex;
               const isActive = idx === currentQuestionIndex;
+              const isSkipped = skippedQuestionIds.has(q.id);
+
               return (
                 <div 
                   key={idx} 
-                  className={`stepper-step ${isActive ? 'active' : isDone ? 'completed' : ''}`}
+                  className={`stepper-step ${isActive ? 'active' : isSkipped ? 'skipped' : isDone ? 'completed' : ''}`}
+                  style={isSkipped ? { background: 'rgba(245, 158, 11, 0.15)', borderColor: 'rgba(245, 158, 11, 0.4)', color: '#fbbf24' } : undefined}
                 >
-                  {isDone ? <Check size={12} strokeWidth={3} /> : <span>Q{idx + 1}</span>}
+                  {isSkipped ? (
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                      <SkipForward size={11} /> Q{idx + 1}
+                    </span>
+                  ) : isDone ? (
+                    <Check size={12} strokeWidth={3} />
+                  ) : (
+                    <span>Q{idx + 1}</span>
+                  )}
                 </div>
               );
             })}
@@ -516,7 +578,7 @@ export default function InterviewRoom({ interviewData, onFinishInterview, onExit
             )}
           </div>
 
-          {/* Action Row: Voice controls & Hint */}
+          {/* Action Row: Voice controls, Skip & Hint */}
           <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '10px', paddingTop: '16px', borderTop: '1px solid var(--border)', marginTop: '16px' }}>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
               <button
@@ -559,6 +621,27 @@ export default function InterviewRoom({ interviewData, onFinishInterview, onExit
                 <span>{showHint ? 'Hide Hint' : 'Need a Clue?'}</span>
               </button>
             </div>
+
+            {/* Quick Skip Button in question panel */}
+            <button
+              type="button"
+              onClick={() => {
+                playClickSound();
+                setShowSkipModal(true);
+              }}
+              className="btn-ai btn-ai-secondary"
+              style={{
+                padding: '6px 14px',
+                fontSize: '0.8rem',
+                color: '#fbbf24',
+                borderColor: 'rgba(245, 158, 11, 0.4)',
+                background: 'rgba(245, 158, 11, 0.08)'
+              }}
+              title="Skip this question and move to next"
+            >
+              <SkipForward size={14} />
+              <span>Skip Question (सवाल छोड़ें)</span>
+            </button>
 
             {showHint && (
               <span style={{ fontSize: '0.8rem', color: '#fbbf24', fontStyle: 'italic', width: '100%' }}>
@@ -653,19 +736,41 @@ export default function InterviewRoom({ interviewData, onFinishInterview, onExit
             </span>
           </div>
 
-          {/* Quick Clear */}
-          {userAnswer && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {userAnswer && (
+              <button
+                type="button"
+                onClick={() => {
+                  playClickSound();
+                  setUserAnswer('');
+                }}
+                className="btn-ai btn-ai-secondary"
+                style={{ padding: '4px 10px', fontSize: '0.75rem' }}
+              >
+                Clear Answer
+              </button>
+            )}
+
             <button
+              type="button"
               onClick={() => {
                 playClickSound();
-                setUserAnswer('');
+                setShowSkipModal(true);
               }}
               className="btn-ai btn-ai-secondary"
-              style={{ padding: '4px 10px', fontSize: '0.75rem' }}
+              style={{
+                padding: '4px 12px',
+                fontSize: '0.76rem',
+                color: '#fbbf24',
+                borderColor: 'rgba(245, 158, 11, 0.4)',
+                background: 'rgba(245, 158, 11, 0.08)'
+              }}
+              title="Skip this question and move to the next"
             >
-              Clear Answer
+              <SkipForward size={13} />
+              <span>Skip Question</span>
             </button>
-          )}
+          </div>
         </div>
 
         {/* Textarea for answer / live speech transcription */}
@@ -706,27 +811,107 @@ export default function InterviewRoom({ interviewData, onFinishInterview, onExit
             </span>
           </button>
 
-          {/* Submit Answer Button */}
-          <button
-            onClick={handleSubmitAnswer}
-            disabled={evaluating || !userAnswer.trim()}
-            className="btn-ai btn-ai-primary"
-            style={{ padding: '12px 28px', fontSize: '0.98rem' }}
-          >
-            {evaluating ? (
-              <>
-                <Sparkles size={18} className="spin" />
-                <span>AI Evaluating Answer...</span>
-              </>
-            ) : (
-              <>
-                <span>Submit Answer for AI Scoring</span>
-                <Send size={18} />
-              </>
-            )}
-          </button>
+          {/* Skip and Submit Buttons Group */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <button
+              type="button"
+              onClick={() => {
+                playClickSound();
+                setShowSkipModal(true);
+              }}
+              className="btn-ai btn-ai-secondary"
+              style={{
+                padding: '12px 18px',
+                fontSize: '0.92rem',
+                color: '#fbbf24',
+                borderColor: 'rgba(245, 158, 11, 0.4)'
+              }}
+              title="Skip this question"
+            >
+              <SkipForward size={16} />
+              <span>Skip Question</span>
+            </button>
+
+            <button
+              onClick={handleSubmitAnswer}
+              disabled={evaluating || !userAnswer.trim()}
+              className="btn-ai btn-ai-primary"
+              style={{ padding: '12px 28px', fontSize: '0.98rem' }}
+            >
+              {evaluating ? (
+                <>
+                  <Sparkles size={18} className="spin" />
+                  <span>AI Evaluating Answer...</span>
+                </>
+              ) : (
+                <>
+                  <span>Submit Answer for AI Scoring</span>
+                  <Send size={18} />
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Skip Question Confirmation Modal */}
+      {showSkipModal && (
+        <div className="feedback-modal-backdrop">
+          <div className="feedback-modal-card" style={{ maxWidth: '520px', textAlign: 'center' }}>
+            <div style={{
+              width: '54px',
+              height: '54px',
+              borderRadius: '50%',
+              background: 'rgba(245, 158, 11, 0.15)',
+              border: '1px solid rgba(245, 158, 11, 0.4)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#fbbf24',
+              margin: '0 auto 16px'
+            }}>
+              <SkipForward size={26} />
+            </div>
+
+            <h3 style={{ fontSize: '1.3rem', fontWeight: 800, color: '#fff', marginBottom: '8px' }}>
+              Skip Question {currentQuestion.question_number}?
+            </h3>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: '1.5', marginBottom: '22px' }}>
+              Kya aap is question ko skip karke agle question par jaana chahte hain? Final Scorecard mein iska <strong>Ideal Model Answer</strong> show hoga taaki aap seekh sakein.
+            </p>
+
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+              <button
+                type="button"
+                onClick={() => setShowSkipModal(false)}
+                className="btn-ai btn-ai-secondary"
+                style={{ padding: '10px 22px', fontSize: '0.9rem' }}
+              >
+                Nahi, Wapas Jayein
+              </button>
+
+              <button
+                type="button"
+                onClick={handleConfirmSkip}
+                className="btn-ai"
+                style={{
+                  background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                  color: '#fff',
+                  padding: '10px 24px',
+                  fontSize: '0.9rem',
+                  boxShadow: '0 0 16px rgba(245, 158, 11, 0.4)',
+                  border: 'none',
+                  cursor: 'pointer',
+                  borderRadius: 'var(--radius-md)',
+                  fontWeight: 700
+                }}
+              >
+                Haan, Skip Karein ➔
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Floating Instant Evaluation Modal Sheet */}
       {lastFeedback && (

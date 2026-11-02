@@ -232,30 +232,40 @@ export default function Scorecard({ data, onStartNew, onViewHistory }) {
 
           {/* Question Selector Tabs */}
           <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '10px', marginBottom: '20px' }}>
-            {questions.map((q, idx) => (
-              <button
-                key={idx}
-                type="button"
-                className={`pill-option ${activeTab === idx ? 'active' : ''}`}
-                style={{ padding: '8px 16px', fontSize: '0.84rem', display: 'flex', alignItems: 'center', gap: '6px' }}
-                onClick={() => {
-                  playClickSound();
-                  setActiveTab(idx);
-                }}
-              >
-                <span>Question {idx + 1}</span>
-                <span style={{
-                  padding: '2px 6px',
-                  borderRadius: 'var(--radius-full)',
-                  fontSize: '0.7rem',
-                  fontWeight: 700,
-                  background: 'rgba(255, 255, 255, 0.1)',
-                  color: '#fff'
-                }}>
-                  {Math.round(q.ai_score || 80)}%
-                </span>
-              </button>
-            ))}
+            {questions.map((q, idx) => {
+              const isSkipped = q.user_answer && q.user_answer.includes('Skipped');
+              return (
+                <button
+                  key={idx}
+                  type="button"
+                  className={`pill-option ${activeTab === idx ? 'active' : ''}`}
+                  style={{
+                    padding: '8px 16px',
+                    fontSize: '0.84rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    borderColor: isSkipped ? 'rgba(245, 158, 11, 0.4)' : undefined
+                  }}
+                  onClick={() => {
+                    playClickSound();
+                    setActiveTab(idx);
+                  }}
+                >
+                  <span>Question {idx + 1}</span>
+                  <span style={{
+                    padding: '2px 6px',
+                    borderRadius: 'var(--radius-full)',
+                    fontSize: '0.7rem',
+                    fontWeight: 700,
+                    background: isSkipped ? 'rgba(245, 158, 11, 0.2)' : 'rgba(255, 255, 255, 0.1)',
+                    color: isSkipped ? '#fbbf24' : '#fff'
+                  }}>
+                    {isSkipped ? 'Skipped' : `${Math.round(q.score !== undefined ? q.score : (q.ai_score || 0))}%`}
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
           {/* Selected Question Details */}
@@ -288,16 +298,16 @@ export default function Scorecard({ data, onStartNew, onViewHistory }) {
 
                 <div style={{
                   textAlign: 'center',
-                  background: 'rgba(6, 182, 212, 0.12)',
-                  border: '1px solid rgba(6, 182, 212, 0.35)',
+                  background: activeQuestion.user_answer?.includes('Skipped') ? 'rgba(245, 158, 11, 0.12)' : 'rgba(6, 182, 212, 0.12)',
+                  border: `1px solid ${activeQuestion.user_answer?.includes('Skipped') ? 'rgba(245, 158, 11, 0.35)' : 'rgba(6, 182, 212, 0.35)'}`,
                   padding: '8px 16px',
                   borderRadius: 'var(--radius-md)'
                 }}>
-                  <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#22d3ee', lineHeight: 1 }}>
-                    {Math.round(activeQuestion.ai_score || 80)}
+                  <div style={{ fontSize: '1.4rem', fontWeight: 800, color: activeQuestion.user_answer?.includes('Skipped') ? '#fbbf24' : '#22d3ee', lineHeight: 1 }}>
+                    {activeQuestion.user_answer?.includes('Skipped') ? 'Skipped' : Math.round(activeQuestion.score !== undefined ? activeQuestion.score : (activeQuestion.ai_score || 0))}
                   </div>
                   <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>
-                    Score
+                    {activeQuestion.user_answer?.includes('Skipped') ? 'Status' : 'Score'}
                   </div>
                 </div>
               </div>

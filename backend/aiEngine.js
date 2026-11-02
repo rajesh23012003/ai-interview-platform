@@ -416,6 +416,16 @@ function getQuestionsForRole(roleKey, resumeAnalysis = null) {
  * AI Response Evaluator
  */
 function evaluateCandidateAnswer(questionObj, userAnswer, role) {
+  if (userAnswer && (userAnswer.includes('[Skipped]') || userAnswer.trim().toLowerCase() === 'skipped')) {
+    return {
+      score: 0,
+      feedback: 'This question was skipped by the candidate during the interview session.',
+      strengths: 'Recognized question complexity and effectively prioritized round time management.',
+      improvements: 'Review the ideal model response below to prepare for similar architectural or troubleshooting questions.',
+      idealAnswer: questionObj.idealAnswer
+    };
+  }
+
   if (!userAnswer || userAnswer.trim().length < 15) {
     return {
       score: 25,
